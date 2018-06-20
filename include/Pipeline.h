@@ -70,11 +70,9 @@ public:
                 break;
             }
             CHECK(!frame.empty()) << "Error when read frame";
-            detectframe(frame);
-
-
+            std::vector<vector<float> > detections = detectframe(frame);
+            ++frame_count;
         }
-
 
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
@@ -84,7 +82,7 @@ public:
         }
     }
 protected:
-    virtual void detectframe(cv::Mat frame)= 0;
+    virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
 private:
     std::string outFile;
     std::string inFile;
@@ -112,8 +110,8 @@ private:
     float confidenceThreshold;
     Detector detector;
 protected:
-    void detectframe(cv::Mat frame){
-        LOG(INFO) << "start detection" << std::endl;
+    std::vector<vector<float> > detectframe(cv::Mat frame){
+        return detector.Detect(frame);
     }
 };
 
