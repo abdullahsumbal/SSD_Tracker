@@ -63,7 +63,7 @@ set(CMAKE_CXX_STANDARD 11)
 # ----------------------------------------------------------------------------
 # Link source and header files
 # ----------------------------------------------------------------------------
-add_executable(${PROJECT_NAME} src/main.cpp include/Pipeline.h src/ssd_detect.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp include/Pipeline.h src/ssd_detect.cpp include/ssd_detect.h)
 
 # ----------------------------------------------------------------------------
 # Link libraries to project

@@ -24,7 +24,10 @@ const char* keys =
                 "{ ed end_delay   |0                   | Delay in milliseconds after video ending | }"
                 "{ o  out         |                    | Name of result video file | }"
                 "{ sl show_logs   |1                   | Show Trackers logs | }"
-                "{ ocl opencl     |0                   | Use OpenCL acceleration | }"
+                "{ m model        |0                   |  | }"
+                "{ w weight       |0                   | | }"
+                "{ th threshold   |0                   |  | }"
+                "{ ocl opencl     |0                   |  | }"
         };
 
 // ----------------------------------------------------------------------
@@ -34,6 +37,11 @@ int main(int argc, char** argv)
     Help();
 
     cv::CommandLineParser parser(argc, argv, keys);
+
+    // Log set up
+    ::google::InitGoogleLogging(argv[0]);
+    // Print output to stderr (while still logging)
+    FLAGS_alsologtostderr = 1;
 
     bool useOCL = parser.get<int>("opencl") ? 1 : 0;
     cv::ocl::setUseOpenCL(useOCL);
