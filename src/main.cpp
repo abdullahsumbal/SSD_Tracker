@@ -17,16 +17,16 @@ static void Help()
 
 const char* keys =
         {
-                "{ @1             |../data/atrium.avi  | movie file | }"
+                "{ @1             |../data/v1.mp4      | input video file | }"
                 "{ e  example     |0                   | number of example | 0 - SSD }"
                 "{ sf start_frame |0                   | Start a video from this position | }"
                 "{ ef end_frame   |0                   | Play a video to this position (if 0 then played to the end of file) | }"
                 "{ ed end_delay   |0                   | Delay in milliseconds after video ending | }"
                 "{ o  output      |                    | Name of result video file | }"
                 "{ sl show_logs   |1                   | Show Trackers logs | }"
-                "{ m model        |/models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt | Model file for detection | }"
-                "{ w weight       |models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Weight file for detection | }"
-                "{ th threshold   |0                   |  | }"
+                "{ m model        |../models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt | Model file for detection | }"
+                "{ w weight       |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Weight file for detection | }"
+                "{ th threshold   |0.1                   |  | }"
                 "{ ocl opencl     |0                   |  | }"
         };
 

@@ -23,7 +23,7 @@ DEFINE_string(mean_value, "104,117,123",
               "If specified, can be one value or can be same as image channels"
               " - would subtract from the corresponding channel). Separated by ','."
               "Either mean_file or mean_value should be provided, not both.");
-DEFINE_string(file_type, "image",
+DEFINE_string(file_type, "video",
               "The file type in the list_file. Currently support image and video.");
 
 class Pipeline
@@ -31,23 +31,53 @@ class Pipeline
 public:
     Pipeline(const cv::CommandLineParser &parser)
     {
-
+        out_file = parser.get<std::string>("output");
+        in_file = parser.get<std::string>(0);
     }
 
     void Process(){
 
         LOG(INFO) << "Process start" << std::endl;
-        startDetector();
 
 #ifndef GFLAGS_GFLAGS_H_
         namespace gflags = google;
 #endif
+        // Set the output mode.
+        std::streambuf* buf = std::cout.rdbuf();
+        std::ofstream outfile;
+        if (!out_file.empty()) {
+            outfile.open(out_file.c_str());
+            if (outfile.good()) {
+                buf = outfile.rdbuf();
+            }
+        }
+        std::ostream out(buf);
 
+        // Set up input
+        cv::VideoCapture cap(in_file);
+        if (!cap.isOpened()) {
+            LOG(FATAL) << "Failed to open video: " << in_file;
+        }
+        cv::UMat frame;
+        int frame_count = 0;
+
+        double tStart  = cv::getTickCount();
+
+        detectImage(frame);
+        //Detection, tracking and counting
+
+        double tEnd  = cv::getTickCount();
+        double runTime = (tEnd - tStart)/cv::getTickFrequency();
+        LOG(INFO)  << "work time = " << runTime << " | Frame rate: "<< frame_count/runTime << std::endl;
+        if (cap.isOpened()) {
+            cap.release();
+        }
     }
-
 protected:
-    virtual bool startDetector() = 0;
+    virtual void detectImage(cv::UMat frame) = 0;
 private:
+    std::string out_file;
+    std::string in_file;
 
 };
 
@@ -60,7 +90,6 @@ public:
         mean_value = FLAGS_mean_value;
         mean_file = FLAGS_mean_file;
         confidence_threshold = parser.get<int>("threshold");
-        out_file = parser.get<std::string>("output");
     }
 private:
     std::string model_file;
@@ -68,14 +97,11 @@ private:
     std::string mean_file;
     std::string mean_value;
     std::string file_type;
-    std::string out_file;
     float confidence_threshold;
+protected:
+    void detectImage(cv::UMat frame){
 
-    bool startDetector(){
-        LOG(INFO) << "starting detector" << std::endl;
-        Detector detector(model_file, weights_file, mean_file, mean_value);
     }
-
 };
 
 #endif //PROJECT_PIPELINE_H

@@ -1,4 +1,7 @@
+
 cmake-build-debug
 .idea
 data
 models
+
+!models/README.md
