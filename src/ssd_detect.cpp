@@ -1,7 +1,7 @@
 #include "ssd_detect.h"
 
 
-Detector::Detector(const string& model_file,
+void Detector::initDetection(const string& model_file,
                    const string& weights_file,
                    const string& mean_file,
                    const string& mean_value) {

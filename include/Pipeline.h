@@ -31,8 +31,8 @@ class Pipeline
 public:
     Pipeline(const cv::CommandLineParser &parser)
     {
-        out_file = parser.get<std::string>("output");
-        in_file = parser.get<std::string>(0);
+        outFile = parser.get<std::string>("output");
+        inFile = parser.get<std::string>(0);
     }
 
     void Process(){
@@ -45,8 +45,8 @@ public:
         // Set the output mode.
         std::streambuf* buf = std::cout.rdbuf();
         std::ofstream outfile;
-        if (!out_file.empty()) {
-            outfile.open(out_file.c_str());
+        if (!outFile.empty()) {
+            outfile.open(outFile.c_str());
             if (outfile.good()) {
                 buf = outfile.rdbuf();
             }
@@ -54,17 +54,27 @@ public:
         std::ostream out(buf);
 
         // Set up input
-        cv::VideoCapture cap(in_file);
+        cv::VideoCapture cap(inFile);
         if (!cap.isOpened()) {
-            LOG(FATAL) << "Failed to open video: " << in_file;
+            LOG(FATAL) << "Failed to open video: " << inFile;
         }
-        cv::UMat frame;
+        cv::Mat frame;
         int frame_count = 0;
 
         double tStart  = cv::getTickCount();
 
-        detectImage(frame);
-        //Detection, tracking and counting
+        while (true) {
+            bool success = cap.read(frame);
+            if (!success) {
+                LOG(INFO) << "Process " << frame_count << " frames from " << inFile;
+                break;
+            }
+            CHECK(!frame.empty()) << "Error when read frame";
+            detectframe(frame);
+
+
+        }
+
 
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
@@ -74,33 +84,36 @@ public:
         }
     }
 protected:
-    virtual void detectImage(cv::UMat frame) = 0;
+    virtual void detectframe(cv::Mat frame)= 0;
 private:
-    std::string out_file;
-    std::string in_file;
+    std::string outFile;
+    std::string inFile;
 
 };
 
 class SSDExample : public Pipeline{
 public:
     SSDExample(const cv::CommandLineParser &parser) : Pipeline(parser){
-        model_file = parser.get<std::string>("model");
-        weights_file = parser.get<std::string>("weight");
-        file_type = FLAGS_file_type;
-        mean_value = FLAGS_mean_value;
-        mean_file = FLAGS_mean_file;
-        confidence_threshold = parser.get<int>("threshold");
+        modelFile = parser.get<std::string>("model");
+        weightsFile = parser.get<std::string>("weight");
+        fileType = FLAGS_file_type;
+        meanValue = FLAGS_mean_value;
+        meanFile = FLAGS_mean_file;
+        confidenceThreshold = parser.get<int>("threshold");
+        // Initialize the network.
+        detector.initDetection(modelFile, weightsFile, meanFile, meanValue);
     }
 private:
-    std::string model_file;
-    std::string weights_file;
-    std::string mean_file;
-    std::string mean_value;
-    std::string file_type;
-    float confidence_threshold;
+    std::string modelFile;
+    std::string weightsFile;
+    std::string meanFile;
+    std::string meanValue;
+    std::string fileType;
+    float confidenceThreshold;
+    Detector detector;
 protected:
-    void detectImage(cv::UMat frame){
-
+    void detectframe(cv::Mat frame){
+        LOG(INFO) << "start detection" << std::endl;
     }
 };
 

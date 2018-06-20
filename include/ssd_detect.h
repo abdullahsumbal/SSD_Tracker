@@ -35,7 +35,7 @@ using namespace caffe;  // NOLINT(build/namespaces)
 
 class Detector {
 public:
-    Detector(const string& model_file,
+    void initDetection(const string& model_file,
              const string& weights_file,
              const string& mean_file,
              const string& mean_value);
