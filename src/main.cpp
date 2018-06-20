@@ -22,10 +22,10 @@ const char* keys =
                 "{ sf start_frame |0                   | Start a video from this position | }"
                 "{ ef end_frame   |0                   | Play a video to this position (if 0 then played to the end of file) | }"
                 "{ ed end_delay   |0                   | Delay in milliseconds after video ending | }"
-                "{ o  out         |                    | Name of result video file | }"
+                "{ o  output      |                    | Name of result video file | }"
                 "{ sl show_logs   |1                   | Show Trackers logs | }"
-                "{ m model        |0                   |  | }"
-                "{ w weight       |0                   | | }"
+                "{ m model        |/models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt | Model file for detection | }"
+                "{ w weight       |models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Weight file for detection | }"
                 "{ th threshold   |0                   |  | }"
                 "{ ocl opencl     |0                   |  | }"
         };

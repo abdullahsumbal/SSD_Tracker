@@ -60,6 +60,7 @@ public:
         mean_value = FLAGS_mean_value;
         mean_file = FLAGS_mean_file;
         confidence_threshold = parser.get<int>("threshold");
+        out_file = parser.get<std::string>("output");
     }
 private:
     std::string model_file;
@@ -72,6 +73,7 @@ private:
 
     bool startDetector(){
         LOG(INFO) << "starting detector" << std::endl;
+        Detector detector(model_file, weights_file, mean_file, mean_value);
     }
 
 };
