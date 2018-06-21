@@ -180,6 +180,7 @@ add_executable(${PROJECT_NAME}
         src/ssd_detect.cpp
         include/ssd_detect.h
         include/defines.h
+        include/nms.h
         ${folder_source} ${folder_headers} ${graph_source} ${graph_header} ${gtl_source} ${gtl_header}
 )
 
