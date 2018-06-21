@@ -5,3 +5,4 @@ data
 models
 
 !models/README.md
+!data/VOC0712/*
