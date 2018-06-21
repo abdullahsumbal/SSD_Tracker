@@ -213,7 +213,7 @@ public:
         settings.m_matchType = tracking::MatchHungrian;
         settings.m_dt = 0.3f;                                // Delta time for Kalman filter
         settings.m_accelNoiseMag = 0.1f;                     // Accel noise magnitude for Kalman filter
-        settings.m_distThres = 10;              // Distance threshold between region and object on two frames
+        settings.m_distThres = 100;              // Distance threshold between region and object on two frames
         settings.m_maximumAllowedSkippedFrames = 2 * m_fps;  // Maximum allowed skipped frames
         settings.m_maxTraceLength = 5 * m_fps;               // Maximum trace length
 
