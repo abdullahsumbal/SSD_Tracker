@@ -36,6 +36,16 @@ public:
         outFile = parser.get<std::string>("output");
         inFile = parser.get<std::string>(0);
         m_fps = 25;
+
+        m_colors.push_back(cv::Scalar(255, 0, 0));
+        m_colors.push_back(cv::Scalar(0, 255, 0));
+        m_colors.push_back(cv::Scalar(0, 0, 255));
+        m_colors.push_back(cv::Scalar(255, 255, 0));
+        m_colors.push_back(cv::Scalar(0, 255, 255));
+        m_colors.push_back(cv::Scalar(255, 0, 255));
+        m_colors.push_back(cv::Scalar(255, 127, 255));
+        m_colors.push_back(cv::Scalar(127, 0, 255));
+        m_colors.push_back(cv::Scalar(127, 0, 127));
     }
 
     void Process(){
@@ -83,14 +93,8 @@ public:
                       cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
                       tmpRegions.push_back(CRegion(object, label, score));
                   }
-                if (!writer.isOpened())
-                {
-                    writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
-                }
-                if (writer.isOpened())
-                {
-                    //writer << frame;
-                }
+
+                //cv::imshow("Video", frame);
             }
 
             // Update Tracker
@@ -98,6 +102,16 @@ public:
             clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
             ++frame_count;
+            DrawData(frame, frame_count);
+            if (!writer.isOpened())
+            {
+                writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
+            }
+            if (writer.isOpened())
+            {
+                writer << frame;
+            }
+
         }
 
         double tEnd  = cv::getTickCount();
@@ -111,9 +125,54 @@ protected:
     std::unique_ptr<CTracker> m_tracker;
     float m_fps;
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
+    virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
+
+    void DrawTrack(cv::Mat frame,
+                   int resizeCoeff,
+                   const CTrack& track,
+                   bool drawTrajectory = true,
+                   bool isStatic = false
+    )
+    {
+        auto ResizeRect = [&](const cv::Rect& r) -> cv::Rect
+        {
+            return cv::Rect(resizeCoeff * r.x, resizeCoeff * r.y, resizeCoeff * r.width, resizeCoeff * r.height);
+        };
+        auto ResizePoint = [&](const cv::Point& pt) -> cv::Point
+        {
+            return cv::Point(resizeCoeff * pt.x, resizeCoeff * pt.y);
+        };
+
+        if (isStatic)
+        {
+            cv::rectangle(frame, ResizeRect(track.GetLastRect()), cv::Scalar(255, 0, 255), 2, CV_AA);
+        }
+        else
+        {
+            cv::rectangle(frame, ResizeRect(track.GetLastRect()), cv::Scalar(0, 255, 0), 1, CV_AA);
+        }
+
+        if (drawTrajectory)
+        {
+            cv::Scalar cl = m_colors[track.m_trackID % m_colors.size()];
+
+            for (size_t j = 0; j < track.m_trace.size() - 1; ++j)
+            {
+                const TrajectoryPoint& pt1 = track.m_trace.at(j);
+                const TrajectoryPoint& pt2 = track.m_trace.at(j + 1);
+
+                cv::line(frame, ResizePoint(pt1.m_prediction), ResizePoint(pt2.m_prediction), cl, 1, CV_AA);
+                if (!pt2.m_hasRaw)
+                {
+                    cv::circle(frame, ResizePoint(pt2.m_prediction), 4, cl, 1, CV_AA);
+                }
+            }
+        }
+    }
 private:
     std::string outFile;
     std::string inFile;
+    std::vector<cv::Scalar> m_colors;
 
     struct FrameInfo
     {
@@ -172,6 +231,24 @@ private:
 protected:
     std::vector<vector<float> > detectframe(cv::Mat frame){
         return detector.Detect(frame);
+    }
+    void DrawData(cv::Mat frame, int framesCounter){
+        for (const auto& track : m_tracker->tracks)
+        {
+            if (track->IsRobust(5,                           // Minimal trajectory size
+                                0.2f,                        // Minimal ratio raw_trajectory_points / trajectory_lenght
+                                cv::Size2f(0.1f, 8.0f))      // Min and max ratio: width / height
+                    )
+            {
+                DrawTrack(frame, 1, *track);
+                std::string label = track->m_lastRegion.m_type + ": " + std::to_string(track->m_lastRegion.m_confidence);
+                int baseLine = 0;
+                cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+                auto rect(track->GetLastRect());
+                cv::rectangle(frame, cv::Rect(cv::Point(rect.x, rect.y - labelSize.height), cv::Size(labelSize.width, labelSize.height + baseLine)), cv::Scalar(255, 255, 255), CV_FILLED);
+                cv::putText(frame, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+            }
+        }
     }
 };
 
