@@ -69,6 +69,10 @@ public:
         // video output
         cv::VideoWriter writer;
 
+        double tDetection = 0;
+        double tTracking = 0;
+        double tDrawing = 0;
+        double tStoring = 0;
         double tStart  = cv::getTickCount();
 
         while (true) {
@@ -83,7 +87,9 @@ public:
                 break;
             }
             CHECK(!frame.empty()) << "Error when read frame";
+            double tStartDetection  = cv::getTickCount();
             std::vector<vector<float> > detections = detectframe(frame);
+            tDetection += cv::getTickCount() -tStartDetection;
 
             regions_t tmpRegions;
             for (int i = 0; i < detections.size(); ++i) {
@@ -92,38 +98,49 @@ public:
                 CHECK_EQ(d.size(), 7);
                 const float score = d[2];
                 std::string label = std::to_string(d[1]);
-                  if (score >= 0.5) {
-                      int xLeftBottom = d[3] * frame.cols;
-                      int yLeftBottom = d[4] * frame.rows;
-                      int xRightTop = d[5] * frame.cols;
-                      int yRightTop = d[6] * frame.rows;
-                      cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-                      tmpRegions.push_back(CRegion(object, label, score));
-                  }
+                if (score >= 0.5) {
+                    int xLeftBottom = d[3] * frame.cols;
+                    int yLeftBottom = d[4] * frame.rows;
+                    int xRightTop = d[5] * frame.cols;
+                    int yRightTop = d[6] * frame.rows;
+                    cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
+                    tmpRegions.push_back(CRegion(object, label, score));
+                }
 
                 //cv::imshow("Video", frame);
             }
 
+            double tStartTracking  = cv::getTickCount();
             // Update Tracker
             cv::UMat clFrame;
             clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
+            tTracking += cv::getTickCount() -tStartTracking;
 
+            double tStartDrawing = cv::getTickCount();
             DrawData(frame, frameCount);
+            tDrawing += cv::getTickCount() - tStartDrawing;
+
             if (!writer.isOpened())
             {
                 writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
             }
+            double tStartStoring = cv::getTickCount();
             if (writer.isOpened())
             {
                 writer << frame;
             }
+            tStoring += cv::getTickCount() - tStartStoring;
             ++frameCount;
         }
 
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
         LOG(INFO)  << "Total time = " << runTime << " seconds | Frame rate: "<< frameCount/runTime << " fps" <<std::endl;
+        LOG(INFO)  << "Total Detection time = " << tDetection/cv::getTickFrequency() << " seconds" <<std::endl;
+        LOG(INFO)  << "Total Tracking time = " << tTracking/cv::getTickFrequency() << " seconds" <<std::endl;
+        LOG(INFO)  << "Total Drawing time = " << tDrawing/cv::getTickFrequency() << " seconds" <<std::endl;
+        LOG(INFO)  << "Total Storing time = " << tStoring/cv::getTickFrequency() << " seconds" <<std::endl;
         if (cap.isOpened()) {
             cap.release();
         }
