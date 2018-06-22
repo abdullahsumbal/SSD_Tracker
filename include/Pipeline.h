@@ -123,7 +123,7 @@ public:
 
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
-        LOG(INFO)  << "work time = " << runTime << " | Frame rate: "<< frameCount/runTime << std::endl;
+        LOG(INFO)  << "Total time = " << runTime << " seconds | Frame rate: "<< frameCount/runTime << " fps" <<std::endl;
         if (cap.isOpened()) {
             cap.release();
         }
