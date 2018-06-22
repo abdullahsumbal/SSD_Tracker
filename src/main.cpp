@@ -20,7 +20,7 @@ const char* keys =
                 "{ @1             |../data/v1.mp4      | input video file | }"
                 "{ e  example     |0                   | number of example | 0 - SSD }"
                 "{ sf start_frame |0                   | Start a video from this position | }"
-                "{ ef end_frame   |0                   | Play a video to this position (if 0 then played to the end of file) | }"
+                "{ ef end_frame   |400                   | Play a video to this position (if 0 then played to the end of file) | }"
                 "{ ed end_delay   |0                   | Delay in milliseconds after video ending | }"
                 "{ o  output      |../data/o1.avi                    | Name of result video file | }"
                 "{ sl show_logs   |1                   | Show Trackers logs | }"

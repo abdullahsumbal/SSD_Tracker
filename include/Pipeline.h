@@ -35,7 +35,9 @@ public:
     {
         outFile = parser.get<std::string>("output");
         inFile = parser.get<std::string>(0);
-        m_fps = 25;
+        endFrame = parser.get<int>("end_frame");
+        startFrame =  parser.get<int>("start_frame");
+        m_fps = 30;
 
         m_colors.push_back(cv::Scalar(255, 0, 0));
         m_colors.push_back(cv::Scalar(0, 255, 0));
@@ -62,7 +64,7 @@ public:
             LOG(FATAL) << "Failed to open video: " << inFile;
         }
         cv::Mat frame;
-        int frame_count = 0;
+        int frameCount = 0;
 
         // video output
         cv::VideoWriter writer;
@@ -72,7 +74,12 @@ public:
         while (true) {
             bool success = cap.read(frame);
             if (!success) {
-                LOG(INFO) << "Process " << frame_count << " frames from " << inFile;
+                LOG(INFO) << "Process " << frameCount << " frames from " << inFile;
+                break;
+            }
+            if (frameCount > endFrame)
+            {
+                std::cout << "Process: reached last " << endFrame << " frame" << std::endl;
                 break;
             }
             CHECK(!frame.empty()) << "Error when read frame";
@@ -101,8 +108,8 @@ public:
             cv::UMat clFrame;
             clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
-            ++frame_count;
-            DrawData(frame, frame_count);
+
+            DrawData(frame, frameCount);
             if (!writer.isOpened())
             {
                 writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
@@ -111,12 +118,12 @@ public:
             {
                 writer << frame;
             }
-
+            ++frameCount;
         }
 
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
-        LOG(INFO)  << "work time = " << runTime << " | Frame rate: "<< frame_count/runTime << std::endl;
+        LOG(INFO)  << "work time = " << runTime << " | Frame rate: "<< frameCount/runTime << std::endl;
         if (cap.isOpened()) {
             cap.release();
         }
@@ -173,6 +180,8 @@ private:
     std::string outFile;
     std::string inFile;
     std::vector<cv::Scalar> m_colors;
+    int endFrame;
+    int startFrame;
 
     struct FrameInfo
     {
