@@ -3,6 +3,7 @@ cmake-build-debug
 .idea
 data
 models
+build
 
 !models/README.md
 !data/VOC0712/*
