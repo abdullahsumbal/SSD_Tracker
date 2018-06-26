@@ -355,7 +355,7 @@ protected:
         }
         // Draw counter
         if (enableCount) {
-            float scale = 0.1;
+            float scale = 0.2;
             float countBoxWidth = frame.size().width * scale;
             float countBoxHeight = frame.size().height * scale;
             //cv::rectangle(frame, cv::Point(0,0), cv::Point(countBoxWidth, countBoxHeight), cv::Scalar(0, 255, 0), 1, CV_AA);
@@ -365,7 +365,7 @@ protected:
                        cv::FONT_HERSHEY_PLAIN,
                        1,
                        cv::Scalar(255, 255, 255), counterLabel);
-            cv::line( frame, cv::Point( 0, 0 ), cv::Point( 300, 300), cv::Scalar( 110, 220, 0 ),  2, 8 );
+            cv::line( frame, cv::Point( 0, 0 ), cv::Point( 300, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
         }
 
     }
