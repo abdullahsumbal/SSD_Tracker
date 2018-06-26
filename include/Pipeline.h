@@ -18,6 +18,7 @@
 #include <opencv/cxmisc.h>
 #include "ssd_detect.h"
 #include "defines.h"
+#include <math.h>
 
 DEFINE_string(mean_file, "",
               "The mean file used to subtract from the input image.");
@@ -38,6 +39,9 @@ public:
         endFrame = parser.get<int>("end_frame");
         startFrame =  parser.get<int>("start_frame");
         m_fps = 30;
+        enableCount = parser.get<bool>("count");
+        direction = parser.get<int>("direction");
+        counter = 0;
 
         m_colors.push_back(cv::Scalar(255, 0, 0));
         m_colors.push_back(cv::Scalar(0, 255, 0));
@@ -110,6 +114,7 @@ public:
             m_tracker->Update(tmpRegions, clFrame, m_fps);
 
             DrawData(frame, frameCount);
+
             if (!writer.isOpened())
             {
                 writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
@@ -131,6 +136,9 @@ public:
 protected:
     std::unique_ptr<CTracker> m_tracker;
     float m_fps;
+    bool enableCount;
+    int direction;
+    int counter;
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
     virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
 
@@ -176,6 +184,90 @@ protected:
             }
         }
     }
+
+    void UpdateCount(cv::Mat frame, CTrack& track){
+            if(track.m_trace.size() >= 2)
+            {
+                const int pt1_x = track.m_trace.at(track.m_trace.size() - 2).m_raw.x;
+                const int pt1_y = track.m_trace.at(track.m_trace.size() - 2).m_raw.y;
+                const int pt2_x = track.m_trace.at(track.m_trace.size() - 1).m_raw.x;
+                const int pt2_y = track.m_trace.at(track.m_trace.size() - 1).m_raw.y;
+                int line1_x1, line1_x2, line1_y1, line1_y2;
+                int line2_x1, line2_x2, line2_y1, line2_y2;
+                line1_x1 = 0;
+                line1_x2 = 1;
+                line1_y1 = 0;
+                line1_y2 = 1;
+                line2_x1 = 0;
+                line2_x2 = 1;
+                line2_y1 = 0;
+                line2_y2 = 1;
+                int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
+                int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
+                //int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+                int pt2_position_line2 = (line2_y2 - line2_y1) * pt2_x + (line2_x1 - line2_x2) * pt2_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+
+                if(direction == 0)
+                {
+                    if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
+                    {
+                        track.m_trace.m_firstPass = true;
+                    }
+                    if (track.m_trace.m_firstPass == true && pt2_position_line2 >= 0 && track.m_trace.m_secondPass == false )
+                    {
+                        track.m_trace.m_secondPass = true;
+                        counter++;
+                    }
+                }else if (direction == 1)
+                {
+                    if(pt2_position_line1 <= 0  && pt1_position_line1 > 0)
+                    {
+                        track.m_trace.m_firstPass = true;
+                    }
+                    if (track.m_trace.m_firstPass == true && pt2_position_line2 <= 0 && track.m_trace.m_secondPass == false )
+                    {
+                        track.m_trace.m_secondPass = true;
+                        counter++;
+                    }
+                }else
+                    {
+                        if(pt2_position_line1 <= 0  && pt1_position_line1 > 0){
+                            track.m_trace.m_firstPass = true;
+                            track.m_trace.m_directionFromLeft = true;
+                        }
+                        else if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
+                        {
+                            track.m_trace.m_firstPass = true;
+                            track.m_trace.m_directionFromLeft = false;
+                        }
+                        if (track.m_trace.m_firstPass == true && pt2_position_line2 <= 0 && track.m_trace.m_secondPass == false && track.m_trace.m_directionFromLeft == true)
+                        {
+                            track.m_trace.m_secondPass = true;
+                            counter++;
+                        }
+                        else if (track.m_trace.m_firstPass == true && pt2_position_line2 >= 0 && track.m_trace.m_secondPass == false && track.m_trace.m_directionFromLeft == false)
+                        {
+                            track.m_trace.m_secondPass = true;
+                            counter++;
+                        }
+                }
+
+            }
+    }
+
+    // Draw count on frame relative to image size
+    void drawtorect(cv::Mat & mat, cv::Rect target, int face, int thickness, cv::Scalar color, const std::string & str)
+    {
+        cv::Size rect = cv::getTextSize(str, face, 1.0, thickness, 0);
+        double scalex = (double)target.width / (double)rect.width;
+        double scaley = (double)target.height / (double)rect.height;
+        double scale = std::min(scalex, scaley);
+        int marginx = scale == scalex ? 0 : (int)((double)target.width * (scalex - scale) / scalex * 0.5);
+        int marginy = scale == scaley ? 0 : (int)((double)target.height * (scaley - scale) / scaley * 0.5);
+        cv::putText(mat, str, cv::Point(target.x + marginx, target.y + target.height - marginy), face, scale, color, thickness, 8, false);
+    }
+
+
 private:
     std::string outFile;
     std::string inFile;
@@ -257,7 +349,25 @@ protected:
                 cv::rectangle(frame, cv::Rect(cv::Point(rect.x, rect.y - labelSize.height), cv::Size(labelSize.width, labelSize.height + baseLine)), cv::Scalar(255, 255, 255), CV_FILLED);
                 cv::putText(frame, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
             }
+            if (enableCount){
+                UpdateCount(frame, *track);
+            }
         }
+        // Draw counter
+        if (enableCount) {
+            float scale = 0.1;
+            float countBoxWidth = frame.size().width * scale;
+            float countBoxHeight = frame.size().height * scale;
+            //cv::rectangle(frame, cv::Point(0,0), cv::Point(countBoxWidth, countBoxHeight), cv::Scalar(0, 255, 0), 1, CV_AA);
+            std::string counterLabel = "Count : " + std::to_string(counter);
+            drawtorect(frame,
+                       cv::Rect(0, 200, int(countBoxWidth), int(countBoxHeight)),
+                       cv::FONT_HERSHEY_PLAIN,
+                       1,
+                       cv::Scalar(255, 255, 255), counterLabel);
+            cv::line( frame, cv::Point( 0, 0 ), cv::Point( 300, 300), cv::Scalar( 110, 220, 0 ),  2, 8 );
+        }
+
     }
 };
 

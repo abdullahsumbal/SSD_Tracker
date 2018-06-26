@@ -26,7 +26,8 @@ CTrack::CTrack(
       m_predictionPoint((region.m_rect.tl() + region.m_rect.br()) / 2),
       m_filterObjectSize(filterObjectSize),
       m_outOfTheFrame(false),
-      m_externalTrackerForLost(externalTrackerForLost)
+      m_externalTrackerForLost(externalTrackerForLost),
+      m_firstPass(false),m_secondPass(false)
 {
     if (filterObjectSize)
     {
