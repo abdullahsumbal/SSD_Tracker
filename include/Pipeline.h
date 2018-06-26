@@ -188,10 +188,10 @@ protected:
     void UpdateCount(cv::Mat frame, CTrack& track){
             if(track.m_trace.size() >= 2)
             {
-                const int pt1_x = track.m_trace.at(track.m_trace.size() - 2).m_raw.x;
-                const int pt1_y = track.m_trace.at(track.m_trace.size() - 2).m_raw.y;
-                const int pt2_x = track.m_trace.at(track.m_trace.size() - 1).m_raw.x;
-                const int pt2_y = track.m_trace.at(track.m_trace.size() - 1).m_raw.y;
+                const int pt1_x = track.m_trace.at(track.m_trace.size() - 2).m_prediction.x;
+                const int pt1_y = track.m_trace.at(track.m_trace.size() - 2).m_prediction.y;
+                const int pt2_x = track.m_trace.at(track.m_trace.size() - 1).m_prediction.x;
+                const int pt2_y = track.m_trace.at(track.m_trace.size() - 1).m_prediction.y;
                 int line1_x1, line1_x2, line1_y1, line1_y2;
                 int line2_x1, line2_x2, line2_y1, line2_y2;
                 line1_x1 = 190;
