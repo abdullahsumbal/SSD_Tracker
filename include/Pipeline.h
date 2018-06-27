@@ -204,7 +204,7 @@ protected:
                 line2_y2 = 288;
                 int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
                 int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
-                //int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+                int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
                 int pt2_position_line2 = (line2_y2 - line2_y1) * pt2_x + (line2_x1 - line2_x2) * pt2_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
 
                 if(direction == 0)
@@ -220,18 +220,18 @@ protected:
                     }
                 }else if (direction == 1)
                 {
-                    if(pt2_position_line1 <= 0  && pt1_position_line1 > 0)
+                    if(pt2_position_line2 <= 0  && pt1_position_line2 > 0)
                     {
                         track.m_trace.m_firstPass = true;
                     }
-                    if (track.m_trace.m_firstPass == true && pt2_position_line2 <= 0 && track.m_trace.m_secondPass == false )
+                    if (track.m_trace.m_firstPass == true && pt2_position_line1 <= 0 && track.m_trace.m_secondPass == false )
                     {
                         track.m_trace.m_secondPass = true;
                         counter++;
                     }
                 }else
                     {
-                        if(pt2_position_line1 <= 0  && pt1_position_line1 > 0){
+                        if(pt2_position_line2 <= 0  && pt1_position_line2 > 0){
                             track.m_trace.m_firstPass = true;
                             track.m_trace.m_directionFromLeft = true;
                         }
@@ -240,7 +240,7 @@ protected:
                             track.m_trace.m_firstPass = true;
                             track.m_trace.m_directionFromLeft = false;
                         }
-                        if (track.m_trace.m_firstPass == true && pt2_position_line2 <= 0 && track.m_trace.m_secondPass == false && track.m_trace.m_directionFromLeft == true)
+                        if (track.m_trace.m_firstPass == true && pt2_position_line1 <= 0 && track.m_trace.m_secondPass == false && track.m_trace.m_directionFromLeft == true)
                         {
                             track.m_trace.m_secondPass = true;
                             counter++;
