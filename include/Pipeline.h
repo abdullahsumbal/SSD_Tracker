@@ -179,7 +179,7 @@ protected:
                 cv::line(frame, ResizePoint(pt1.m_prediction), ResizePoint(pt2.m_prediction), cl, 1, CV_AA);
                 if (!pt2.m_hasRaw)
                 {
-                    cv::circle(frame, ResizePoint(pt2.m_prediction), 4, cl, 1, CV_AA);
+                    //cv::circle(frame, ResizePoint(pt2.m_prediction), 4, cl, 1, CV_AA);
                 }
             }
         }
