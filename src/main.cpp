@@ -26,6 +26,8 @@ const char* keys =
                 "{ w weight       |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Weight file for detection | }"
                 "{ th threshold   |0.1                   |  | }"
                 "{ ocl opencl     |0                   |  | }"
+                "{ co count       |1                   |  | }"
+                "{ d direction    |1                   |  | }"
         };
 
 // ----------------------------------------------------------------------

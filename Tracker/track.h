@@ -154,7 +154,9 @@ public:
 
         return res;
     }
-
+    bool m_firstPass = false;
+    bool m_secondPass = false;
+    bool m_directionFromLeft = false;
 private:
     std::deque<TrajectoryPoint> m_trace;
 };
@@ -210,6 +212,8 @@ public:
     CRegion m_lastRegion;
     Point_t m_averagePoint;   ///< Average point after LocalTracking
     cv::Rect m_boundidgRect;  ///< Bounding rect after LocalTracking
+    bool m_firstPass;
+    bool m_secondPass;
 
     cv::Rect GetLastRect() const;
 
