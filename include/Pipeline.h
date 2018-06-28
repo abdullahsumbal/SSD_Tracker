@@ -119,7 +119,7 @@ public:
 
             if (!writer.isOpened())
             {
-                writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
+                writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, copyFrame.size(), true);
             }
             if (writer.isOpened())
             {
