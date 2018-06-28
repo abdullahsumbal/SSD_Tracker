@@ -87,7 +87,9 @@ public:
                 break;
             }
             CHECK(!frame.empty()) << "Error when read frame";
-            std::vector<vector<float> > detections = detectframe(frame);
+            cv::Mat copyFrame(frame, cv::Rect(10, 20, 70, 10));
+
+            std::vector<vector<float> > detections = detectframe(copyFrame);
 
             regions_t tmpRegions;
             for (int i = 0; i < detections.size(); ++i) {
@@ -97,10 +99,10 @@ public:
                 const float score = d[2];
                 std::string label = std::to_string(d[1]);
                   if (score >= 0.5) {
-                      int xLeftBottom = d[3] * frame.cols;
-                      int yLeftBottom = d[4] * frame.rows;
-                      int xRightTop = d[5] * frame.cols;
-                      int yRightTop = d[6] * frame.rows;
+                      int xLeftBottom = d[3] * copyFrame.cols;
+                      int yLeftBottom = d[4] * copyFrame.rows;
+                      int xRightTop = d[5] * copyFrame.cols;
+                      int yRightTop = d[6] * copyFrame.rows;
                       cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
                       tmpRegions.push_back(CRegion(object, label, score));
                   }
@@ -110,10 +112,10 @@ public:
 
             // Update Tracker
             cv::UMat clFrame;
-            clFrame = frame.getUMat(cv::ACCESS_READ);
+            clFrame = copyFrame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
 
-            DrawData(frame, frameCount);
+            DrawData(copyFrame, frameCount);
 
             if (!writer.isOpened())
             {
@@ -121,7 +123,7 @@ public:
             }
             if (writer.isOpened())
             {
-                writer << frame;
+                writer << copyFrame;
             }
             ++frameCount;
         }
