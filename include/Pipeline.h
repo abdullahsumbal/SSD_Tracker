@@ -196,14 +196,14 @@ protected:
                 const int pt2_y = track.m_trace.at(track.m_trace.size() - 1).m_prediction.y;
                 int line1_x1, line1_x2, line1_y1, line1_y2;
                 int line2_x1, line2_x2, line2_y1, line2_y2;
-                line1_x1 = 190;
-                line1_x2 = 190;
+                line1_x1 = 350;
+                line1_x2 = 350;
                 line1_y1 = 0;
-                line1_y2 = 288;
-                line2_x1 = 200;
-                line2_x2 = 200;
+                line1_y2 = 350;
+                line2_x1 = 380;
+                line2_x2 = 380;
                 line2_y1 = 0;
-                line2_y2 = 288;
+                line2_y2 = 350;
                 int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
                 int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
                 int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
@@ -368,8 +368,8 @@ protected:
                        cv::FONT_HERSHEY_PLAIN,
                        1,
                        cv::Scalar(255, 255, 255), counterLabel);
-            cv::line( frame, cv::Point( 190, 0 ), cv::Point( 190, 288), cv::Scalar( 120, 220, 0 ),  2, 8 );
-            cv::line( frame, cv::Point( 200, 0 ), cv::Point( 200, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
+            cv::line( frame, cv::Point( 380, 0 ), cv::Point( 380, 350), cv::Scalar( 120, 220, 0 ),  2, 8 );
+            //cv::line( frame, cv::Point( 200, 0 ), cv::Point( 200, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
         }
 
     }
