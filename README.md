@@ -1,3 +1,6 @@
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/abdullahsumbal/SSD_Tracker.svg?columns=all)](https://waffle.io/abdullahsumbal/SSD_Tracker)
+
+
 ## This project is under development.
 
 ### What Can it do right now?
