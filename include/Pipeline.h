@@ -200,7 +200,7 @@ protected:
                 line1_x2 = 350;
                 line1_y1 = 0;
                 line1_y2 = 350;
-                line2_x1 = 400;
+                line2_x1 = 430;
                 line2_x2 = 380;
                 line2_y1 = 0;
                 line2_y2 = 350;
@@ -368,7 +368,7 @@ protected:
                        cv::FONT_HERSHEY_PLAIN,
                        1,
                        cv::Scalar(255, 255, 255), counterLabel);
-            cv::line( frame, cv::Point( 400, 0 ), cv::Point( 380, 350), cv::Scalar( 120, 220, 0 ),  2, 8 );
+            cv::line( frame, cv::Point( 440, 0 ), cv::Point( 380, 350), cv::Scalar( 120, 220, 0 ),  2, 8 );
             //cv::line( frame, cv::Point( 200, 0 ), cv::Point( 200, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
         }
 
