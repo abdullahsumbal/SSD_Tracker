@@ -166,7 +166,7 @@ protected:
         }
         else
         {
-            cv::rectangle(frame, ResizeRect(track.GetLastRect()), cv::Scalar(0, 255, 0), 1, CV_AA);
+            cv::rectangle(frame, ResizeRect(track.GetLastRect()), cv::Scalar(0, 255, 0), 0.5, CV_AA);
         }
 
         if (drawTrajectory)
