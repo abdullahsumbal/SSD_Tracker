@@ -178,7 +178,7 @@ protected:
                 const TrajectoryPoint& pt1 = track.m_trace.at(j);
                 const TrajectoryPoint& pt2 = track.m_trace.at(j + 1);
 
-                cv::line(frame, ResizePoint(pt1.m_prediction), ResizePoint(pt2.m_prediction), cl, 1, CV_AA);
+                //cv::line(frame, ResizePoint(pt1.m_prediction), ResizePoint(pt2.m_prediction), cl, 1, CV_AA);
                 if (!pt2.m_hasRaw)
                 {
                     //cv::circle(frame, ResizePoint(pt2.m_prediction), 4, cl, 1, CV_AA);
@@ -343,7 +343,7 @@ protected:
                                 cv::Size2f(0.1f, 8.0f))      // Min and max ratio: width / height
                     )
             {
-                //DrawTrack(frame, 1, *track);
+                DrawTrack(frame, 1, *track);
                 std::string label = track->m_lastRegion.m_type + ": " + std::to_string(track->m_lastRegion.m_confidence);
                 //std::string label = std::to_string(track->m_trace.m_firstPass) + " | " + std::to_string(track->m_trace.m_secondPass);
                 int baseLine = 0;
