@@ -3,8 +3,10 @@
 
 ## This project is under development.
 
+###Updated on 6 July 2018
+
 ### What Can it do right now?
-Detection and tracking.
+Detection, Tracking and Counting.
 
 ### I want to see a video of the output.
 Here is a [link](https://drive.google.com/file/d/16T_maoXj-p480xVYnEpNgJzN4NDqwHJw/view?usp=sharing).  
@@ -13,16 +15,17 @@ Here is a [link](https://drive.google.com/file/d/16T_maoXj-p480xVYnEpNgJzN4NDqwH
 I am getting between 20 to 37 FPS on M60 GPU. Here is a [link](https://github.com/abdullahsumbal/Installtion/blob/master/SSD_Tracker_Tests/SSD_Tracking-Report.md) to some tests I conducted. 
 
 ### What will it be able to do when it is done?
-Detection , tracking and counting of people, dogs and bicycles.
+Detection, tracking and counting of people, dogs and bicycles.
 
 ### When will it be done?
 End of 2018 Summer. :)
 
 ### I cant wait for the installation documentation, tell me what I need to install!
-install CUDA and CUDNN
-install caffe using cmake,
-install opencv3.3.1
-and the run my project.
+Install CUDA and CUDNN \
+Install caffe using cmake,\
+Install opencv3.3.1\
+and run my project.\
+Or shoot me a message if you very desperate :)
 
 ### How are you making all this work?
 1. I am using tracking implementation from [Multitarget-tracker](https://github.com/Smorodov/Multitarget-tracker)
