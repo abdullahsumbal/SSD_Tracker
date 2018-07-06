@@ -33,7 +33,7 @@ Or shoot me a message if you very desperate :)
 3. I will be implementing my own version of counting.
 
 ### Can you provide installation and implementation documentation?
-As promised, the pipeline document is out. Here is the [link](https://docs.google.com/document/d/1pirNh674ZnlK11vpz-GIqR-w-7ng7_xvqVleqOr_CkQ/edit?usp=sharing).\
+As promised, the pipeline document is out. Here is the [link](https://drive.google.com/open?id=1-g0aO1VBpcY-WMtEbet16w_cQNtlfSt-).\
 I am currently working on the testing document. Coming up soon.
  
 
