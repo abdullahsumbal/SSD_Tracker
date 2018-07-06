@@ -3,7 +3,7 @@
 
 ## This project is under development.
 
-###Updated on 6 July 2018
+### Updated on 6 July 2018
 
 ### What Can it do right now?
 Detection, Tracking and Counting.
