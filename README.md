@@ -30,7 +30,9 @@ and the run my project.
 3. I will be implementing my own version of counting.
 
 ### Can you provide installation and implementation documentation?
-I am working on it. Coming soon, Next Week. 
+As promised, the pipeline document is out. Here is the [link](https://docs.google.com/document/d/1pirNh674ZnlK11vpz-GIqR-w-7ng7_xvqVleqOr_CkQ/edit?usp=sharing).\
+I am currently working on the testing document. Coming up soon.
+ 
 
 ### Bro, your english and coding sucks?
 I know :( , I am working on it.
