@@ -178,7 +178,7 @@ protected:
                 const TrajectoryPoint& pt1 = track.m_trace.at(j);
                 const TrajectoryPoint& pt2 = track.m_trace.at(j + 1);
 
-                //cv::line(frame, ResizePoint(pt1.m_prediction), ResizePoint(pt2.m_prediction), cl, 1, CV_AA);
+                cv::line(frame, ResizePoint(pt1.m_prediction), ResizePoint(pt2.m_prediction), cl, 1, CV_AA);
                 if (!pt2.m_hasRaw)
                 {
                     //cv::circle(frame, ResizePoint(pt2.m_prediction), 4, cl, 1, CV_AA);
