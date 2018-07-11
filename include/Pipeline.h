@@ -87,7 +87,7 @@ public:
                 break;
             }
             CHECK(!frame.empty()) << "Error when read frame";
-            cv::Mat copyFrame(frame, cv::Rect(600, 350, 600, 350));
+            cv::Mat copyFrame(frame, cv::Rect(600, 100, 300, 180));
 
             std::vector<vector<float> > detections = detectframe(copyFrame);
 
