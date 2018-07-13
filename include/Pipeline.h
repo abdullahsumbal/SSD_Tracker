@@ -32,7 +32,7 @@ DEFINE_string(file_type, "video",
 class Pipeline
 {
 public:
-    Pipeline(const cv::CommandLineParser &parser)
+    explicit Pipeline(const cv::CommandLineParser &parser)
     {
         outFile = parser.get<std::string>("output");
         inFile = parser.get<std::string>(0);
@@ -42,16 +42,21 @@ public:
         enableCount = parser.get<bool>("count");
         direction = parser.get<int>("direction");
         counter = 0;
+        useCrop = parser.get<bool>("crop");
+        cropRect = cv::Rect(parser.get<int>("crop_x"), parser.get<int>("crop_y"), parser.get<int>("crop_width"), parser.get<int>("crop_height"));
+        detectThreshold = parser.get<float>("threshold");
 
-        m_colors.push_back(cv::Scalar(255, 0, 0));
-        m_colors.push_back(cv::Scalar(0, 255, 0));
-        m_colors.push_back(cv::Scalar(0, 0, 255));
-        m_colors.push_back(cv::Scalar(255, 255, 0));
-        m_colors.push_back(cv::Scalar(0, 255, 255));
-        m_colors.push_back(cv::Scalar(255, 0, 255));
-        m_colors.push_back(cv::Scalar(255, 127, 255));
-        m_colors.push_back(cv::Scalar(127, 0, 255));
-        m_colors.push_back(cv::Scalar(127, 0, 127));
+        // Different color used for path lines in tracking
+        // Add more if you are a colorful person.
+        m_colors.emplace_back(cv::Scalar(255, 0, 0));
+        m_colors.emplace_back(cv::Scalar(0, 255, 0));
+        m_colors.emplace_back(cv::Scalar(0, 0, 255));
+        m_colors.emplace_back(cv::Scalar(255, 255, 0));
+        m_colors.emplace_back(cv::Scalar(0, 255, 255));
+        m_colors.emplace_back(cv::Scalar(255, 0, 255));
+        m_colors.emplace_back(cv::Scalar(255, 127, 255));
+        m_colors.emplace_back(cv::Scalar(127, 0, 255));
+        m_colors.emplace_back(cv::Scalar(127, 0, 127));
     }
 
     void Process(){
@@ -75,6 +80,7 @@ public:
 
         double tStart  = cv::getTickCount();
 
+        // Process one frame at a time
         while (true) {
             bool success = cap.read(frame);
             if (!success) {
@@ -87,43 +93,56 @@ public:
                 break;
             }
             CHECK(!frame.empty()) << "Error when read frame";
-            cv::Mat copyFrame(frame, cv::Rect(600, 100, 300, 180));
 
-            std::vector<vector<float> > detections = detectframe(copyFrame);
+            // Focus on interested area in the frame
+            if (useCrop)
+            {
+                cv::Mat copyFrame(frame, cropRect);
+                // Deep copy (TODO)
+                //copyFrame.copyTo(frame);
+                // Shallow copy
+                frame = copyFrame;
+            }
 
+            // get all the detected objects.
             regions_t tmpRegions;
-            for (int i = 0; i < detections.size(); ++i) {
-                const vector<float> &d = detections[i];
+            std::vector<vector<float> > detections = detectframe(frame);
+
+            // Filter out all the objects based
+            // 1. Threshold
+            // 2. Desired object class
+            for (auto const& detection : detections){
+                const vector<float> &d = detection;
                 // Detection format: [image_id, label, score, xmin, ymin, xmax, ymax].
                 CHECK_EQ(d.size(), 7);
                 const float score = d[2];
                 std::string label = std::to_string(d[1]);
-                  if (score >= 0.5) {
-                      int xLeftBottom = d[3] * copyFrame.cols;
-                      int yLeftBottom = d[4] * copyFrame.rows;
-                      int xRightTop = d[5] * copyFrame.cols;
-                      int yRightTop = d[6] * copyFrame.rows;
-                      cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-                      tmpRegions.push_back(CRegion(object, label, score));
-                  }
+                if (score >= detectThreshold) {
+                    auto xLeftBottom = static_cast<int>(d[3] * frame.cols);
+                    auto yLeftBottom = static_cast<int>(d[4] * frame.rows);
+                    auto xRightTop = static_cast<int>(d[5] * frame.cols);
+                    auto yRightTop = static_cast<int>(d[6] * frame.rows);
+                    cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
+                    tmpRegions.push_back(CRegion(object, label, score));
+                }
 
                 //cv::imshow("Video", frame);
             }
 
             // Update Tracker
             cv::UMat clFrame;
-            clFrame = copyFrame.getUMat(cv::ACCESS_READ);
+            clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
 
-            DrawData(copyFrame, frameCount);
+            DrawData(frame, frameCount);
 
             if (!writer.isOpened())
             {
-                writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, copyFrame.size(), true);
+                writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
             }
             if (writer.isOpened())
             {
-                writer << copyFrame;
+                writer << frame;
             }
             ++frameCount;
         }
@@ -141,6 +160,7 @@ protected:
     bool enableCount;
     int direction;
     int counter;
+
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
     virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
 
@@ -276,6 +296,9 @@ private:
     std::vector<cv::Scalar> m_colors;
     int endFrame;
     int startFrame;
+    bool useCrop;
+    cv::Rect cropRect;
+    float detectThreshold;
 
     struct FrameInfo
     {
@@ -302,7 +325,6 @@ public:
         fileType = FLAGS_file_type;
         meanValue = FLAGS_mean_value;
         meanFile = FLAGS_mean_file;
-        confidenceThreshold = parser.get<int>("threshold");
         // Initialize the Detector
         detector.initDetection(modelFile, weightsFile, meanFile, meanValue);
         // Initialize the tracker
@@ -329,7 +351,6 @@ private:
     std::string meanFile;
     std::string meanValue;
     std::string fileType;
-    float confidenceThreshold;
     Detector detector;
 protected:
     std::vector<vector<float> > detectframe(cv::Mat frame){
