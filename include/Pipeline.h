@@ -19,6 +19,7 @@
 #include "ssd_detect.h"
 #include "defines.h"
 #include <math.h>
+#include <algorithm>
 
 DEFINE_string(mean_file, "",
               "The mean file used to subtract from the input image.");
@@ -43,8 +44,18 @@ public:
         direction = parser.get<int>("direction");
         counter = 0;
         useCrop = parser.get<bool>("crop");
-        cropRect = cv::Rect(parser.get<int>("crop_x"), parser.get<int>("crop_y"), parser.get<int>("crop_width"), parser.get<int>("crop_height"));
+        cropFrameWidth = parser.get<int>("crop_width");
+        cropFrameHeight = parser.get<int>("crop_height");
+        cropRect = cv::Rect(parser.get<int>("crop_x"), parser.get<int>("crop_y"), cropFrameWidth, cropFrameHeight);
         detectThreshold = parser.get<float>("threshold");
+        desiredDetect = parser.get<bool>("desired_detect");
+        desiredObjectsString = parser.get<std::string>("desired_objects");
+
+
+        if (!parser.check())
+        {
+            parser.printErrors();
+        }
 
         // Different color used for path lines in tracking
         // Add more if you are a colorful person.
@@ -60,6 +71,18 @@ public:
     }
 
     void Process(){
+
+        // Prepossessing step. May be make a new function to do prepossessing (TODO)
+        // Converting desired object into float.
+        std::vector <float> desiredObjects;
+        std::stringstream ss(desiredObjectsString);
+        while( ss.good() )
+        {
+            string substring;
+            getline( ss, substring, ',' );
+            desiredObjects.push_back( std::stof(substring) );
+        }
+
 
         LOG(INFO) << "Process start" << std::endl;
 
@@ -77,6 +100,17 @@ public:
 
         // video output
         cv::VideoWriter writer;
+        if(useCrop)
+        {
+            writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, cv::Size(cropFrameWidth, cropFrameHeight), true);
+        }
+        else
+        {
+            auto frame_width = static_cast<int>(cap.get(CV_CAP_PROP_FRAME_WIDTH));
+            auto frame_height = static_cast<int>(cap.get(CV_CAP_PROP_FRAME_HEIGHT));
+            writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, cv::Size(frame_width, frame_height), true);
+        }
+
 
         double tStart  = cv::getTickCount();
 
@@ -87,6 +121,11 @@ public:
                 LOG(INFO) << "Process " << frameCount << " frames from " << inFile;
                 break;
             }
+            if(frameCount < startFrame)
+            {
+                continue;
+            }
+
             if (frameCount > endFrame)
             {
                 std::cout << "Process: reached last " << endFrame << " frame" << std::endl;
@@ -104,20 +143,29 @@ public:
                 frame = copyFrame;
             }
 
-            // get all the detected objects.
+            // Get all the detected objects.
             regions_t tmpRegions;
             std::vector<vector<float> > detections = detectframe(frame);
 
             // Filter out all the objects based
             // 1. Threshold
-            // 2. Desired object class
+            // 2. Desired object classe
             for (auto const& detection : detections){
                 const vector<float> &d = detection;
                 // Detection format: [image_id, label, score, xmin, ymin, xmax, ymax].
                 CHECK_EQ(d.size(), 7);
                 const float score = d[2];
-                std::string label = std::to_string(d[1]);
+                const float fLabel= d[1];
+                if(desiredDetect)
+                {
+                    if (!(std::find(desiredObjects.begin(), desiredObjects.end(), fLabel) != desiredObjects.end()))
+                    {
+                        continue;
+                    }
+                }
+                std::string label = std::to_string(static_cast<int>(fLabel));
                 if (score >= detectThreshold) {
+
                     auto xLeftBottom = static_cast<int>(d[3] * frame.cols);
                     auto yLeftBottom = static_cast<int>(d[4] * frame.rows);
                     auto xRightTop = static_cast<int>(d[5] * frame.cols);
@@ -125,7 +173,6 @@ public:
                     cv::Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
                     tmpRegions.push_back(CRegion(object, label, score));
                 }
-
                 //cv::imshow("Video", frame);
             }
 
@@ -134,12 +181,13 @@ public:
             clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
 
-            DrawData(frame, frameCount);
-
-            if (!writer.isOpened())
+            if(enableCount)
             {
-                writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, frame.size(), true);
+                // Update Counter
+                CounterUpdater(frame, frameCount);
             }
+
+            DrawData(frame, frameCount);
             if (writer.isOpened())
             {
                 writer << frame;
@@ -163,6 +211,7 @@ protected:
 
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
     virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
+    virtual void CounterUpdater(cv::Mat frame, int framesCounter) = 0;
 
     void DrawTrack(cv::Mat frame,
                    int resizeCoeff,
@@ -186,7 +235,7 @@ protected:
         }
         else
         {
-            cv::rectangle(frame, ResizeRect(track.GetLastRect()), cv::Scalar(0, 255, 0), 0.5, CV_AA);
+            cv::rectangle(frame, ResizeRect(track.GetLastRect()), cv::Scalar(0, 255, 0), 1, CV_AA);
         }
 
         if (drawTrajectory)
@@ -299,6 +348,10 @@ private:
     bool useCrop;
     cv::Rect cropRect;
     float detectThreshold;
+    bool desiredDetect;
+    std::string desiredObjectsString;
+    int cropFrameWidth;
+    int cropFrameHeight;
 
     struct FrameInfo
     {
@@ -373,9 +426,6 @@ protected:
                 cv::rectangle(frame, cv::Rect(cv::Point(rect.x, rect.y - labelSize.height), cv::Size(labelSize.width, labelSize.height + baseLine)), cv::Scalar(255, 255, 255), CV_FILLED);
                 cv::putText(frame, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
             }
-            if (enableCount){
-                UpdateCount(frame, *track);
-            }
         }
         // Draw counter
         if (enableCount) {
@@ -393,6 +443,81 @@ protected:
             //cv::line( frame, cv::Point( 200, 0 ), cv::Point( 200, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
         }
 
+    }
+
+    void CounterUpdater(cv::Mat frame, int framesCounter)
+    {
+
+        for (const auto& track : m_tracker->tracks)
+        {
+            if(track.get()->m_trace.size() >= 2)
+            {
+                const int pt1_x = track.get()->m_trace.at(track.get()->m_trace.size() - 2).m_prediction.x;
+                const int pt1_y = track.get()->m_trace.at(track.get()->m_trace.size() - 2).m_prediction.y;
+                const int pt2_x = track.get()->m_trace.at(track.get()->m_trace.size() - 1).m_prediction.x;
+                const int pt2_y = track.get()->m_trace.at(track.get()->m_trace.size() - 1).m_prediction.y;
+                int line1_x1, line1_x2, line1_y1, line1_y2;
+                int line2_x1, line2_x2, line2_y1, line2_y2;
+                line1_x1 = 350;
+                line1_x2 = 350;
+                line1_y1 = 0;
+                line1_y2 = 350;
+                line2_x1 = 430;
+                line2_x2 = 380;
+                line2_y1 = 0;
+                line2_y2 = 350;
+                int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
+                int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
+                int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+                int pt2_position_line2 = (line2_y2 - line2_y1) * pt2_x + (line2_x1 - line2_x2) * pt2_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+
+                if(direction == 0)
+                {
+                    if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
+                    {
+                        track.get()->m_trace.FirstPass();
+                    }
+                    if (track.get()->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track.get()->m_trace.GetSecondPass() )
+                    {
+                        track.get()->m_trace.SecondPass();
+                        counter++;
+                    }
+                }else if (direction == 1)
+                {
+                    if(pt2_position_line2 <= 0  && pt1_position_line2 > 0)
+                    {
+                        track.get()->m_trace.FirstPass();
+                    }
+                    if (track.get()->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track.get()->m_trace.GetSecondPass() )
+                    {
+                        track.get()->m_trace.SecondPass();
+                        counter++;
+                    }
+                }else
+                {
+                    if(pt2_position_line2 <= 0  && pt1_position_line2 > 0){
+                        track.get()->m_trace.FirstPass();
+                        track.get()->m_trace.m_directionFromLeft = true;
+                    }
+                    else if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
+                    {
+                        track.get()->m_trace.FirstPass();
+                        track.get()->m_trace.m_directionFromLeft = false;
+                    }
+                    if (track.get()->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track.get()->m_trace.GetSecondPass() && track.get()->m_trace.m_directionFromLeft == true)
+                    {
+                        track.get()->m_trace.SecondPass();
+                        counter++;
+                    }
+                    else if (track.get()->m_trace.GetFirstPass() == true && pt2_position_line2 >= 0 && !track.get()->m_trace.GetSecondPass() && track.get()->m_trace.m_directionFromLeft == false)
+                    {
+                        track.get()->m_trace.SecondPass();
+                        counter++;
+                    }
+                }
+
+            }
+        }
     }
 };
 
