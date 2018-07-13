@@ -28,14 +28,14 @@ const char* keys =
 
                 "{ co count       |1                   | Counting parameter: Flag to use counting  | }"
                 "{ d direction    |1                   | Counting parameter: Variable to allow counting in a certain direction. 0 - left to right, 1 - right to left, 2 - both | }"
-                "{ l1p1_x         |1                   | Counting parameter: line 1 point 1 x coordinate  | }"
-                "{ l1p1_y         |1                   | Counting parameter: line 1 point 1 y coordinate  | }"
-                "{ l1p2_x         |1                   | Counting parameter: line 1 point 2 x coordinate  | }"
-                "{ l1p2_y         |1                   | Counting parameter: line 1 point 2 y coordinate  | }"
-                "{ l2p1_x         |1                   | Counting parameter: line 2 point 1 x coordinate  | }"
-                "{ l2p1_y         |1                   | Counting parameter: line 2 point 1 y coordinate  | }"
-                "{ l2p2_x         |1                   | Counting parameter: line 2 point 2 x coordinate  | }"
-                "{ l2p2_y         |1                   | Counting parameter: line 2 point 2 y coordinate  | }"
+                "{ l1p1_x         |350                   | Counting parameter: line 1 point 1 x coordinate  | }"
+                "{ l1p1_y         |0                   | Counting parameter: line 1 point 1 y coordinate  | }"
+                "{ l1p2_x         |350                   | Counting parameter: line 1 point 2 x coordinate  | }"
+                "{ l1p2_y         |350                   | Counting parameter: line 1 point 2 y coordinate  | }"
+                "{ l2p1_x         |430                   | Counting parameter: line 2 point 1 x coordinate  | }"
+                "{ l2p1_y         |0                   | Counting parameter: line 2 point 1 y coordinate  | }"
+                "{ l2p2_x         |380                   | Counting parameter: line 2 point 2 x coordinate  | }"
+                "{ l2p2_y         |350                   | Counting parameter: line 2 point 2 y coordinate  | }"
 
                 "{ o output       |../data/o1.avi      | Writing parameter: Name of output video file | }"
         };

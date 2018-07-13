@@ -256,75 +256,6 @@ protected:
         }
     }
 
-    void UpdateCount(cv::Mat frame, CTrack& track){
-            if(track.m_trace.size() >= 2)
-            {
-                const int pt1_x = track.m_trace.at(track.m_trace.size() - 2).m_prediction.x;
-                const int pt1_y = track.m_trace.at(track.m_trace.size() - 2).m_prediction.y;
-                const int pt2_x = track.m_trace.at(track.m_trace.size() - 1).m_prediction.x;
-                const int pt2_y = track.m_trace.at(track.m_trace.size() - 1).m_prediction.y;
-                int line1_x1, line1_x2, line1_y1, line1_y2;
-                int line2_x1, line2_x2, line2_y1, line2_y2;
-                line1_x1 = 350;
-                line1_x2 = 350;
-                line1_y1 = 0;
-                line1_y2 = 350;
-                line2_x1 = 430;
-                line2_x2 = 380;
-                line2_y1 = 0;
-                line2_y2 = 350;
-                int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
-                int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
-                int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
-                int pt2_position_line2 = (line2_y2 - line2_y1) * pt2_x + (line2_x1 - line2_x2) * pt2_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
-
-                if(direction == 0)
-                {
-                    if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
-                    {
-                        track.m_trace.m_firstPass = true;
-                    }
-                    if (track.m_trace.m_firstPass == true && pt2_position_line2 >= 0 && track.m_trace.m_secondPass == false )
-                    {
-                        track.m_trace.m_secondPass = true;
-                        counter++;
-                    }
-                }else if (direction == 1)
-                {
-                    if(pt2_position_line2 <= 0  && pt1_position_line2 > 0)
-                    {
-                        track.m_trace.m_firstPass = true;
-                    }
-                    if (track.m_trace.m_firstPass == true && pt2_position_line1 <= 0 && track.m_trace.m_secondPass == false )
-                    {
-                        track.m_trace.m_secondPass = true;
-                        counter++;
-                    }
-                }else
-                    {
-                        if(pt2_position_line2 <= 0  && pt1_position_line2 > 0){
-                            track.m_trace.m_firstPass = true;
-                            track.m_trace.m_directionFromLeft = true;
-                        }
-                        else if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
-                        {
-                            track.m_trace.m_firstPass = true;
-                            track.m_trace.m_directionFromLeft = false;
-                        }
-                        if (track.m_trace.m_firstPass == true && pt2_position_line1 <= 0 && track.m_trace.m_secondPass == false && track.m_trace.m_directionFromLeft == true)
-                        {
-                            track.m_trace.m_secondPass = true;
-                            counter++;
-                        }
-                        else if (track.m_trace.m_firstPass == true && pt2_position_line2 >= 0 && track.m_trace.m_secondPass == false && track.m_trace.m_directionFromLeft == false)
-                        {
-                            track.m_trace.m_secondPass = true;
-                            counter++;
-                        }
-                }
-
-            }
-    }
 
     // Draw count on frame relative to image size
     void drawtorect(cv::Mat & mat, cv::Rect target, int face, int thickness, cv::Scalar color, const std::string & str)
@@ -340,18 +271,18 @@ protected:
 
 
 private:
-    std::string outFile;
-    std::string inFile;
-    std::vector<cv::Scalar> m_colors;
+    bool useCrop;
     int endFrame;
     int startFrame;
-    bool useCrop;
     cv::Rect cropRect;
-    float detectThreshold;
     bool desiredDetect;
-    std::string desiredObjectsString;
     int cropFrameWidth;
+    std::string inFile;
+    std::string outFile;
     int cropFrameHeight;
+    float detectThreshold;
+    std::vector<cv::Scalar> m_colors;
+    std::string desiredObjectsString;
 
     struct FrameInfo
     {
@@ -373,6 +304,14 @@ private:
 class SSDExample : public Pipeline{
 public:
     SSDExample(const cv::CommandLineParser &parser) : Pipeline(parser){
+        line1_x1 = parser.get<int>("l1p1_x");
+        line1_x2 = parser.get<int>("l1p2_x");
+        line1_y1 = parser.get<int>("l1p1_y");
+        line1_y2 = parser.get<int>("l1p2_y");
+        line2_x1 = parser.get<int>("l2p1_x");
+        line2_x2 = parser.get<int>("l2p2_x");
+        line2_y1 = parser.get<int>("l2p1_y");
+        line2_y2 = parser.get<int>("l2p2_y");
         modelFile = parser.get<std::string>("model");
         weightsFile = parser.get<std::string>("weight");
         fileType = FLAGS_file_type;
@@ -382,8 +321,9 @@ public:
         detector.initDetection(modelFile, weightsFile, meanFile, meanValue);
         // Initialize the tracker
         config_t config;
+
+        // TODO: put these variables in main
         TrackerSettings settings;
-        //settings.m_useLocalTracking = m_useLocalTracking;
         settings.m_distType = tracking::DistRects;
         settings.m_kalmanType = tracking::KalmanLinear;
         settings.m_filterGoal = tracking::FilterRect;
@@ -391,9 +331,9 @@ public:
         settings.m_matchType = tracking::MatchHungrian;
         settings.m_dt = 0.3f;                                // Delta time for Kalman filter
         settings.m_accelNoiseMag = 0.1f;                     // Accel noise magnitude for Kalman filter
-        settings.m_distThres = 100;              // Distance threshold between region and object on two frames
-        settings.m_maximumAllowedSkippedFrames = 1 * m_fps;  // Maximum allowed skipped frames
-        settings.m_maxTraceLength = 5 * m_fps;               // Maximum trace length
+        settings.m_distThres = 100;                          // Distance threshold between region and object on two frames
+        settings.m_maximumAllowedSkippedFrames = (size_t)(1 * m_fps);  // Maximum allowed skipped frames
+        settings.m_maxTraceLength = (size_t)(5 * m_fps);               // Maximum trace length
 
         m_tracker = std::make_unique<CTracker>(settings);
     }
@@ -405,6 +345,14 @@ private:
     std::string meanValue;
     std::string fileType;
     Detector detector;
+    int line1_x1;
+    int line1_x2;
+    int line1_y1;
+    int line1_y2;
+    int line2_x1;
+    int line2_x2;
+    int line2_y1;
+    int line2_y2;
 protected:
     std::vector<vector<float> > detectframe(cv::Mat frame){
         return detector.Detect(frame);
@@ -439,7 +387,7 @@ protected:
                        cv::FONT_HERSHEY_PLAIN,
                        1,
                        cv::Scalar(255, 255, 255), counterLabel);
-            cv::line( frame, cv::Point( 440, 0 ), cv::Point( 380, 350), cv::Scalar( 120, 220, 0 ),  2, 8 );
+            cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
             //cv::line( frame, cv::Point( 200, 0 ), cv::Point( 200, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
         }
 
@@ -456,16 +404,16 @@ protected:
                 const int pt1_y = track.get()->m_trace.at(track.get()->m_trace.size() - 2).m_prediction.y;
                 const int pt2_x = track.get()->m_trace.at(track.get()->m_trace.size() - 1).m_prediction.x;
                 const int pt2_y = track.get()->m_trace.at(track.get()->m_trace.size() - 1).m_prediction.y;
-                int line1_x1, line1_x2, line1_y1, line1_y2;
-                int line2_x1, line2_x2, line2_y1, line2_y2;
-                line1_x1 = 350;
-                line1_x2 = 350;
-                line1_y1 = 0;
-                line1_y2 = 350;
-                line2_x1 = 430;
-                line2_x2 = 380;
-                line2_y1 = 0;
-                line2_y2 = 350;
+//                int line1_x1, line1_x2, line1_y1, line1_y2;
+//                int line2_x1, line2_x2, line2_y1, line2_y2;
+//                line1_x1 = 350;
+//                line1_x2 = 350;
+//                line1_y1 = 0;
+//                line1_y2 = 350;
+//                line2_x1 = 430;
+//                line2_x2 = 380;
+//                line2_y1 = 0;
+//                line2_y2 = 350;
                 int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
                 int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
                 int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
