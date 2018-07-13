@@ -257,19 +257,6 @@ protected:
     }
 
 
-    // Draw count on frame relative to image size
-    void drawtorect(cv::Mat & mat, cv::Rect target, int face, int thickness, cv::Scalar color, const std::string & str)
-    {
-        cv::Size rect = cv::getTextSize(str, face, 1.0, thickness, 0);
-        double scalex = (double)target.width / (double)rect.width;
-        double scaley = (double)target.height / (double)rect.height;
-        double scale = std::min(scalex, scaley);
-        int marginx = scale == scalex ? 0 : (int)((double)target.width * (scalex - scale) / scalex * 0.5);
-        int marginy = scale == scaley ? 0 : (int)((double)target.height * (scaley - scale) / scaley * 0.5);
-        cv::putText(mat, str, cv::Point(target.x + marginx, target.y + target.height - marginy), face, scale, color, thickness, 8, false);
-    }
-
-
 private:
     bool useCrop;
     int endFrame;
@@ -284,26 +271,13 @@ private:
     std::vector<cv::Scalar> m_colors;
     std::string desiredObjectsString;
 
-    struct FrameInfo
-    {
-        cv::Mat m_frame;
-        cv::UMat m_gray;
-        regions_t m_regions;
-        int64 m_dt;
-
-        FrameInfo()
-                : m_dt(0)
-        {
-
-        }
-    };
-    FrameInfo m_frameInfo;
-
 };
 
 class SSDExample : public Pipeline{
 public:
-    SSDExample(const cv::CommandLineParser &parser) : Pipeline(parser){
+    explicit SSDExample(const cv::CommandLineParser &parser) : Pipeline(parser){
+        meanFile = FLAGS_mean_file;
+        meanValue = FLAGS_mean_value;
         line1_x1 = parser.get<int>("l1p1_x");
         line1_x2 = parser.get<int>("l1p2_x");
         line1_y1 = parser.get<int>("l1p1_y");
@@ -314,11 +288,10 @@ public:
         line2_y2 = parser.get<int>("l2p2_y");
         modelFile = parser.get<std::string>("model");
         weightsFile = parser.get<std::string>("weight");
-        fileType = FLAGS_file_type;
-        meanValue = FLAGS_mean_value;
-        meanFile = FLAGS_mean_file;
+
         // Initialize the Detector
         detector.initDetection(modelFile, weightsFile, meanFile, meanValue);
+
         // Initialize the tracker
         config_t config;
 
@@ -338,12 +311,10 @@ public:
         m_tracker = std::make_unique<CTracker>(settings);
     }
 private:
-    TrackerSettings settings;
     std::string modelFile;
     std::string weightsFile;
     std::string meanFile;
     std::string meanValue;
-    std::string fileType;
     Detector detector;
     int line1_x1;
     int line1_x2;
@@ -375,7 +346,7 @@ protected:
                 cv::putText(frame, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
             }
         }
-        // Draw counter
+        // Draw Counter line
         if (enableCount) {
             float scale = 0.2;
             float countBoxWidth = frame.size().width * scale;
@@ -386,11 +357,9 @@ protected:
                        cv::Rect(0, 200, int(countBoxWidth), int(countBoxHeight)),
                        cv::FONT_HERSHEY_PLAIN,
                        1,
-                       cv::Scalar(255, 255, 255), counterLabel);
+                       counterLabel);
             cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
-            //cv::line( frame, cv::Point( 200, 0 ), cv::Point( 200, 300), cv::Scalar( 120, 220, 0 ),  2, 8 );
         }
-
     }
 
     void CounterUpdater(cv::Mat frame, int framesCounter)
@@ -398,74 +367,78 @@ protected:
 
         for (const auto& track : m_tracker->tracks)
         {
-            if(track.get()->m_trace.size() >= 2)
+            if(track->m_trace.size() >= 2)
             {
-                const int pt1_x = track.get()->m_trace.at(track.get()->m_trace.size() - 2).m_prediction.x;
-                const int pt1_y = track.get()->m_trace.at(track.get()->m_trace.size() - 2).m_prediction.y;
-                const int pt2_x = track.get()->m_trace.at(track.get()->m_trace.size() - 1).m_prediction.x;
-                const int pt2_y = track.get()->m_trace.at(track.get()->m_trace.size() - 1).m_prediction.y;
-//                int line1_x1, line1_x2, line1_y1, line1_y2;
-//                int line2_x1, line2_x2, line2_y1, line2_y2;
-//                line1_x1 = 350;
-//                line1_x2 = 350;
-//                line1_y1 = 0;
-//                line1_y2 = 350;
-//                line2_x1 = 430;
-//                line2_x2 = 380;
-//                line2_y1 = 0;
-//                line2_y2 = 350;
-                int pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
-                int pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
-                int pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
-                int pt2_position_line2 = (line2_y2 - line2_y1) * pt2_x + (line2_x1 - line2_x2) * pt2_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+                track_t pt1_x = track->m_trace.at(track->m_trace.size() - 2).m_prediction.x;
+                track_t pt1_y = track->m_trace.at(track->m_trace.size() - 2).m_prediction.y;
+                track_t pt2_x = track->m_trace.at(track->m_trace.size() - 1).m_prediction.x;
+                track_t pt2_y = track->m_trace.at(track->m_trace.size() - 1).m_prediction.y;
+
+                float pt1_position_line1 = (line1_y2 - line1_y1) * pt1_x + (line1_x1 - line1_x2) * pt1_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
+                float pt2_position_line1 = (line1_y2 - line1_y1) * pt2_x + (line1_x1 - line1_x2) * pt2_y + (line1_x2 * line1_y1 - line1_x1 * line1_y2);
+                float pt1_position_line2 = (line2_y2 - line2_y1) * pt1_x + (line2_x1 - line2_x2) * pt1_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
+                float pt2_position_line2 = (line2_y2 - line2_y1) * pt2_x + (line2_x1 - line2_x2) * pt2_y + (line2_x2 * line2_y1 - line2_x1 * line2_y2);
 
                 if(direction == 0)
                 {
                     if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
                     {
-                        track.get()->m_trace.FirstPass();
+                        track->m_trace.FirstPass();
                     }
-                    if (track.get()->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track.get()->m_trace.GetSecondPass() )
+                    if (track->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track->m_trace.GetSecondPass() )
                     {
-                        track.get()->m_trace.SecondPass();
+                        track->m_trace.SecondPass();
                         counter++;
                     }
                 }else if (direction == 1)
                 {
                     if(pt2_position_line2 <= 0  && pt1_position_line2 > 0)
                     {
-                        track.get()->m_trace.FirstPass();
+                        track->m_trace.FirstPass();
                     }
-                    if (track.get()->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track.get()->m_trace.GetSecondPass() )
+                    if (track->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track->m_trace.GetSecondPass() )
                     {
-                        track.get()->m_trace.SecondPass();
+                        track->m_trace.SecondPass();
                         counter++;
                     }
                 }else
                 {
                     if(pt2_position_line2 <= 0  && pt1_position_line2 > 0){
-                        track.get()->m_trace.FirstPass();
-                        track.get()->m_trace.m_directionFromLeft = true;
+                        track->m_trace.FirstPass();
+                        track->m_trace.m_directionFromLeft = true;
                     }
                     else if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
                     {
-                        track.get()->m_trace.FirstPass();
-                        track.get()->m_trace.m_directionFromLeft = false;
+                        track->m_trace.FirstPass();
+                        track->m_trace.m_directionFromLeft = false;
                     }
-                    if (track.get()->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track.get()->m_trace.GetSecondPass() && track.get()->m_trace.m_directionFromLeft == true)
+                    if (track->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track->m_trace.GetSecondPass() && track->m_trace.m_directionFromLeft)
                     {
-                        track.get()->m_trace.SecondPass();
+                        track->m_trace.SecondPass();
                         counter++;
                     }
-                    else if (track.get()->m_trace.GetFirstPass() == true && pt2_position_line2 >= 0 && !track.get()->m_trace.GetSecondPass() && track.get()->m_trace.m_directionFromLeft == false)
+                    else if (track->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track->m_trace.GetSecondPass() && !track->m_trace.m_directionFromLeft)
                     {
-                        track.get()->m_trace.SecondPass();
+                        track->m_trace.SecondPass();
                         counter++;
                     }
                 }
 
             }
         }
+    }
+
+    // Draw count on frame relative to image size
+    void drawtorect(cv::Mat & mat, cv::Rect target, int face, int thickness, const std::string & str)
+    {
+        int baseLine = 0;
+        cv::Size rect = cv::getTextSize(str, face, 1.0, thickness, &baseLine);
+        double scalex = (double)target.width / (double)rect.width;
+        double scaley = (double)target.height / (double)rect.height;
+        double scale = std::min(scalex, scaley);
+        int marginx = scale == scalex ? 0 : (int)((double)target.width * (scalex - scale) / scalex * 0.5);
+        int marginy = scale == scaley ? 0 : (int)((double)target.height * (scaley - scale) / scaley * 0.5);
+        cv::putText(mat, str, cv::Point(target.x + marginx, target.y + target.height - marginy), face, scale, cv::Scalar(255, 255, 255), thickness, 8, false);
     }
 };
 
