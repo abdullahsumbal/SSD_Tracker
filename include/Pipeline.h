@@ -27,8 +27,6 @@ DEFINE_string(mean_value, "104,117,123",
               "If specified, can be one value or can be same as image channels"
               " - would subtract from the corresponding channel). Separated by ','."
               "Either mean_file or mean_value should be provided, not both.");
-DEFINE_string(file_type, "video",
-              "The file type in the list_file. Currently support image and video.");
 
 class Pipeline
 {
