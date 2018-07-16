@@ -397,7 +397,7 @@ protected:
                         std::pair<std::map<string, int>::iterator,bool> ret;
                         ret = countObjects_LefttoRight.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
                         if (!ret.second) {
-                            ret.first->second = ret.first->second++;
+                            ret.first->second = ret.first->second + 1;
                         }
                     }
                 }else if (direction == 1)
