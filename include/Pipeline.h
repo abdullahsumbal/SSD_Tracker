@@ -412,7 +412,7 @@ protected:
                         std::pair<std::map<string, int>::iterator,bool> ret;
                         ret = countObjects_RighttoLeft.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
                         if (!ret.second) {
-                            ret.first->second = ret.first->second++;
+                            ret.first->second = ret.first->second + 1;
                         }
                     }
                 }else
@@ -432,7 +432,7 @@ protected:
                         std::pair<std::map<string, int>::iterator,bool> ret;
                         ret = countObjects_LefttoRight.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
                         if (!ret.second) {
-                            ret.first->second = ret.first->second++;
+                            ret.first->second = ret.first->second + 1;
                         }
                     }
                     else if (track->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track->m_trace.GetSecondPass() && !track->m_trace.m_directionFromLeft)
@@ -441,7 +441,7 @@ protected:
                         std::pair<std::map<string, int>::iterator,bool> ret;
                         ret = countObjects_RighttoLeft.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
                         if (!ret.second) {
-                            ret.first->second = ret.first->second++;
+                            ret.first->second = ret.first->second + 1;
                         }
                     }
                 }
