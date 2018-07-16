@@ -81,6 +81,8 @@ public:
             desiredObjects.push_back( std::stof(substring) );
         }
 
+        std::map <float, int> countObjects;
+
 
         LOG(INFO) << "Process start" << std::endl;
 
@@ -182,7 +184,7 @@ public:
             if(enableCount)
             {
                 // Update Counter
-                CounterUpdater(frame, frameCount);
+                CounterUpdater(frame, countObjects);
             }
 
             DrawData(frame, frameCount);
@@ -209,7 +211,7 @@ protected:
 
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
     virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
-    virtual void CounterUpdater(cv::Mat frame, int framesCounter) = 0;
+    virtual void CounterUpdater(cv::Mat frame, std::map <float, int> countObjects) = 0;
 
     void DrawTrack(cv::Mat frame,
                    int resizeCoeff,
@@ -360,7 +362,7 @@ protected:
         }
     }
 
-    void CounterUpdater(cv::Mat frame, int framesCounter)
+    void CounterUpdater(cv::Mat frame, std::map <float, int> countObjects)
     {
 
         for (const auto& track : m_tracker->tracks)
