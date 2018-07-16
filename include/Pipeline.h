@@ -40,7 +40,6 @@ public:
         m_fps = 30;
         enableCount = parser.get<bool>("count");
         direction = parser.get<int>("direction");
-        counter = 0;
         useCrop = parser.get<bool>("crop");
         cropFrameWidth = parser.get<int>("crop_width");
         cropFrameHeight = parser.get<int>("crop_height");
@@ -81,7 +80,8 @@ public:
             desiredObjects.push_back( std::stof(substring) );
         }
 
-        std::map <float, int> countObjects;
+        std::map <string,  int> countObjects_LefttoRight;
+        std::map <string,  int> countObjects_RighttoLeft;
 
 
         LOG(INFO) << "Process start" << std::endl;
@@ -184,7 +184,7 @@ public:
             if(enableCount)
             {
                 // Update Counter
-                CounterUpdater(frame, countObjects);
+                CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
             }
 
             DrawData(frame, frameCount);
@@ -198,6 +198,14 @@ public:
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
         LOG(INFO)  << "Total time = " << runTime << " seconds | Frame rate: "<< frameCount/runTime << " fps" <<std::endl;
+        for(auto elem : countObjects_LefttoRight)
+        {
+            std::cout << elem.first << " " << elem.second << "\n";
+        }
+        for(auto elem : countObjects_RighttoLeft)
+        {
+            std::cout << elem.first << " " << elem.second << "\n";
+        }
         if (cap.isOpened()) {
             cap.release();
         }
@@ -207,11 +215,10 @@ protected:
     float m_fps;
     bool enableCount;
     int direction;
-    int counter;
 
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
     virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
-    virtual void CounterUpdater(cv::Mat frame, std::map <float, int> countObjects) = 0;
+    virtual void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft) = 0;
 
     void DrawTrack(cv::Mat frame,
                    int resizeCoeff,
@@ -351,8 +358,7 @@ protected:
             float scale = 0.2;
             float countBoxWidth = frame.size().width * scale;
             float countBoxHeight = frame.size().height * scale;
-            //cv::rectangle(frame, cv::Point(0,0), cv::Point(countBoxWidth, countBoxHeight), cv::Scalar(0, 255, 0), 1, CV_AA);
-            std::string counterLabel = "Count : " + std::to_string(counter);
+            std::string counterLabel = "Count : " + std::to_string(0);
             drawtorect(frame,
                        cv::Rect(0, 200, int(countBoxWidth), int(countBoxHeight)),
                        cv::FONT_HERSHEY_PLAIN,
@@ -362,7 +368,7 @@ protected:
         }
     }
 
-    void CounterUpdater(cv::Mat frame, std::map <float, int> countObjects)
+    void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft)
     {
 
         for (const auto& track : m_tracker->tracks)
@@ -388,7 +394,11 @@ protected:
                     if (track->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track->m_trace.GetSecondPass() )
                     {
                         track->m_trace.SecondPass();
-                        counter++;
+                        std::pair<std::map<string, int>::iterator,bool> ret;
+                        ret = countObjects_LefttoRight.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
+                        if (!ret.second) {
+                            ret.first->second = ret.first->second++;
+                        }
                     }
                 }else if (direction == 1)
                 {
@@ -399,7 +409,11 @@ protected:
                     if (track->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track->m_trace.GetSecondPass() )
                     {
                         track->m_trace.SecondPass();
-                        counter++;
+                        std::pair<std::map<string, int>::iterator,bool> ret;
+                        ret = countObjects_RighttoLeft.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
+                        if (!ret.second) {
+                            ret.first->second = ret.first->second++;
+                        }
                     }
                 }else
                 {
@@ -415,15 +429,22 @@ protected:
                     if (track->m_trace.GetFirstPass() && pt2_position_line1 <= 0 && !track->m_trace.GetSecondPass() && track->m_trace.m_directionFromLeft)
                     {
                         track->m_trace.SecondPass();
-                        counter++;
+                        std::pair<std::map<string, int>::iterator,bool> ret;
+                        ret = countObjects_LefttoRight.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
+                        if (!ret.second) {
+                            ret.first->second = ret.first->second++;
+                        }
                     }
                     else if (track->m_trace.GetFirstPass() && pt2_position_line2 >= 0 && !track->m_trace.GetSecondPass() && !track->m_trace.m_directionFromLeft)
                     {
                         track->m_trace.SecondPass();
-                        counter++;
+                        std::pair<std::map<string, int>::iterator,bool> ret;
+                        ret = countObjects_RighttoLeft.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
+                        if (!ret.second) {
+                            ret.first->second = ret.first->second++;
+                        }
                     }
                 }
-
             }
         }
     }
