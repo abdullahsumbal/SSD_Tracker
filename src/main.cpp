@@ -37,7 +37,11 @@ const char* keys =
                 "{ l2p2_x         |380                   | Counting parameter: line 2 point 2 x coordinate  | }"
                 "{ l2p2_y         |350                   | Counting parameter: line 2 point 2 y coordinate  | }"
 
+                "{ dc draw_count  |1                   | Counting parameter: Flag to enable drawing info for count  | }"
+                "{ do draw_other  |1                   | Counting parameter: Flag to enable drawing info other component  | }"
+
                 "{ o output       |../data/o1.avi      | Writing parameter: Name of output video file | }"
+                "{ save_video     |1                   | Writing parameter: Flag to enable writing to file | }"
         };
 
 // ----------------------------------------------------------------------
