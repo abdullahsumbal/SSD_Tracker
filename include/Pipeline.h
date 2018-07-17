@@ -376,8 +376,7 @@ protected:
             std::string counterLabel_Left = "Count : " + std::to_string(0);
             std::string counterLabel_Right = "Count : " + std::to_string(0);
 
-            cv::putText(frame, counterLabel_Left, cv::Point(x,  y), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
-            cv::putText(frame, counterLabel_Right, cv::Point(x,  y), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
+            cv::putText(frame, counterLabel_Left, cv::Point(0, (int)(frame.size().width * 0.25)), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
     }
 
     void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft)
