@@ -374,8 +374,8 @@ protected:
         cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
 
         // Counter label
-        std::string counterLabel_L;
-        std::string counterLabel_R;
+        std::string counterLabel_L = "Left: ";
+        std::string counterLabel_R = "Right : ";
         for(auto elem : countObjects_LefttoRight){
             counterLabel_L += elem.first + ": " + std::to_string(elem.second) + "|";
         }
@@ -468,20 +468,6 @@ protected:
             }
         }
     }
-
-    // Draw count on frame relative to image size
-    void drawtorect(cv::Mat & mat, cv::Rect target, int face, int thickness, const std::string & str)
-    {
-        int baseLine = 0;
-        cv::Size rect = cv::getTextSize(str, face, 1.0, thickness, &baseLine);
-        double scalex = (double)target.width / (double)rect.width;
-        double scaley = (double)target.height / (double)rect.height;
-        double scale = std::min(scalex, scaley);
-        int marginx = scale == scalex ? 0 : (int)((double)target.width * (scalex - scale) / scalex * 0.5);
-        int marginy = scale == scaley ? 0 : (int)((double)target.height * (scaley - scale) / scaley * 0.5);
-        cv::putText(mat, str, cv::Point(target.x + marginx, target.y + target.height - marginy), face, scale, cv::Scalar(255, 255, 255), thickness, 8, false);
-    }
-
 };
 
 #endif //PROJECT_PIPELINE_H
