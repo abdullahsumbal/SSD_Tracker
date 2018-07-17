@@ -80,10 +80,6 @@ public:
             desiredObjects.push_back( std::stof(substring) );
         }
 
-        std::map <string,  int> countObjects_LefttoRight;
-        std::map <string,  int> countObjects_RighttoLeft;
-
-
         LOG(INFO) << "Process start" << std::endl;
 
 #ifndef GFLAGS_GFLAGS_H_
@@ -100,17 +96,20 @@ public:
 
         // video output
         cv::VideoWriter writer;
+        auto frame_width = static_cast<int>(cap.get(CV_CAP_PROP_FRAME_WIDTH));
+        auto frame_height = static_cast<int>(cap.get(CV_CAP_PROP_FRAME_HEIGHT));
         if(useCrop)
         {
             writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, cv::Size(cropFrameWidth, cropFrameHeight), true);
         }
         else
         {
-            auto frame_width = static_cast<int>(cap.get(CV_CAP_PROP_FRAME_WIDTH));
-            auto frame_height = static_cast<int>(cap.get(CV_CAP_PROP_FRAME_HEIGHT));
             writer.open(outFile, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), m_fps, cv::Size(frame_width, frame_height), true);
         }
 
+        std::map <string,  int> countObjects_LefttoRight;
+        std::map <string,  int> countObjects_RighttoLeft;
+        double fontScale = CalculateRelativeSize(frame_width, frame_height);
 
         double tStart  = cv::getTickCount();
 
@@ -187,7 +186,7 @@ public:
                 CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
             }
 
-            DrawData(frame, frameCount);
+            DrawData(frame, frameCount, fontScale);
             if (writer.isOpened())
             {
                 writer << frame;
@@ -217,8 +216,9 @@ protected:
     int direction;
 
     virtual std::vector<vector<float> > detectframe(cv::Mat frame)= 0;
-    virtual void DrawData(cv::Mat frame, int framesCounter) = 0;
+    virtual void DrawData(cv::Mat frame, int framesCounter, double fontScale) = 0;
     virtual void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft) = 0;
+    virtual void DrawCounter(cv::Mat frame, double fontScale, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft) = 0;
 
     void DrawTrack(cv::Mat frame,
                    int resizeCoeff,
@@ -263,7 +263,18 @@ protected:
         }
     }
 
-
+    double CalculateRelativeSize(int frame_width, int frame_height)
+    {
+        int baseLine = 0;
+        double countBoxWidth = frame_width * 0.2;
+        double countBoxHeight = frame_height * 0.2;
+        cv::Rect countBoxRec(0, 200, int(countBoxWidth), int(countBoxHeight));
+        std::string counterLabel_Left = "Count : " + std::to_string(0);
+        cv::Size rect = cv::getTextSize(counterLabel_Left, cv::FONT_HERSHEY_PLAIN, 1.0, 1, &baseLine);
+        double scalex = (double)countBoxRec.width / (double)rect.width;
+        double scaley = (double)countBoxRec.height / (double)rect.height;
+        return std::min(scalex, scaley);
+    }
 private:
     bool useCrop;
     int endFrame;
@@ -335,7 +346,7 @@ protected:
     std::vector<vector<float> > detectframe(cv::Mat frame){
         return detector.Detect(frame);
     }
-    void DrawData(cv::Mat frame, int framesCounter){
+    void DrawData(cv::Mat frame, int framesCounter, double fontScale){
         for (const auto& track : m_tracker->tracks)
         {
             if (track->IsRobust(5,                           // Minimal trajectory size
@@ -353,19 +364,20 @@ protected:
                 cv::putText(frame, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
             }
         }
-        // Draw Counter line
-        if (enableCount) {
-            float scale = 0.2;
-            float countBoxWidth = frame.size().width * scale;
-            float countBoxHeight = frame.size().height * scale;
-            std::string counterLabel = "Count : " + std::to_string(0);
-            drawtorect(frame,
-                       cv::Rect(0, 200, int(countBoxWidth), int(countBoxHeight)),
-                       cv::FONT_HERSHEY_PLAIN,
-                       1,
-                       counterLabel);
+
+    }
+
+    void DrawCounter(cv::Mat frame, double fontScale, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft){
+
+            // Line
             cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
-        }
+
+            // Counter label
+            std::string counterLabel_Left = "Count : " + std::to_string(0);
+            std::string counterLabel_Right = "Count : " + std::to_string(0);
+
+            cv::putText(frame, counterLabel_Left, cv::Point(x,  y), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
+            cv::putText(frame, counterLabel_Right, cv::Point(x,  y), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
     }
 
     void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft)
@@ -461,6 +473,7 @@ protected:
         int marginy = scale == scaley ? 0 : (int)((double)target.height * (scaley - scale) / scaley * 0.5);
         cv::putText(mat, str, cv::Point(target.x + marginx, target.y + target.height - marginy), face, scale, cv::Scalar(255, 255, 255), thickness, 8, false);
     }
+
 };
 
 #endif //PROJECT_PIPELINE_H
