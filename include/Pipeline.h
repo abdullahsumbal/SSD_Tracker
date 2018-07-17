@@ -184,10 +184,10 @@ public:
             {
                 // Update Counter
                 CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
-                DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
+                //DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
             }
 
-            DrawData(frame, frameCount, fontScale);
+            //DrawData(frame, frameCount, fontScale);
             if (writer.isOpened())
             {
                 writer << frame;
@@ -374,8 +374,8 @@ protected:
         cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
 
         // Counter label
-        std::string counterLabel_L = "Left: ";
-        std::string counterLabel_R = "Right : ";
+        std::string counterLabel_L;
+        std::string counterLabel_R;
         for(auto elem : countObjects_LefttoRight){
             counterLabel_L += elem.first + ": " + std::to_string(elem.second) + "|";
         }
