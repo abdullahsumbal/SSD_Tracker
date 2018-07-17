@@ -38,7 +38,10 @@ public:
         endFrame = parser.get<int>("end_frame");
         startFrame =  parser.get<int>("start_frame");
         m_fps = 30;
+        saveVideo = parser.get<bool>("save_video");
         enableCount = parser.get<bool>("count");
+        drawCount = parser.get<bool>("draw_count");
+        drawOther = parser.get<bool>("draw_other");
         direction = parser.get<int>("direction");
         useCrop = parser.get<bool>("crop");
         cropFrameWidth = parser.get<int>("crop_width");
@@ -184,11 +187,18 @@ public:
             {
                 // Update Counter
                 CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
-                //DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
+
+                if(drawCount){
+                    DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
+                }
+
             }
 
-            //DrawData(frame, frameCount, fontScale);
-            if (writer.isOpened())
+            if(drawOther){
+                DrawData(frame, frameCount, fontScale);
+            }
+
+            if (writer.isOpened() and saveVideo)
             {
                 writer << frame;
             }
@@ -277,6 +287,9 @@ protected:
         return std::min(scalex, scaley);
     }
 private:
+    bool saveVideo;
+    bool drawCount;
+    bool drawOther;
     bool useCrop;
     int endFrame;
     int startFrame;
