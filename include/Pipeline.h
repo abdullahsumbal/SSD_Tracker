@@ -369,14 +369,22 @@ protected:
 
     void DrawCounter(cv::Mat frame, double fontScale, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft){
 
-            // Line
-            cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
+        // Line
+        cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0 ),  2, 8 );
 
-            // Counter label
-            std::string counterLabel_Left = "Count : " + std::to_string(0);
-            std::string counterLabel_Right = "Count : " + std::to_string(0);
+        // Counter label
+        std::string counterLabel_L= "";
+        std::string counterLabel_R = "";
+        for(auto elem : countObjects_LefttoRight){
+            counterLabel_L = counterLabel_L + elem.first + ": " + std::to_string(elem.second) + "|";
+        }
+        for(auto elem : countObjects_RighttoLeft){
+            counterLabel_R = counterLabel_R + elem.first + ": " + std::to_string(elem.second) + "|";
+        }
 
-            cv::putText(frame, counterLabel_Left, cv::Point(0, (int)(frame.size().width * 0.25)), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
+
+        cv::putText(frame, counterLabel_L, cv::Point(0, (int)(frame.size().width * 0.1)), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
+        cv::putText(frame, counterLabel_R, cv::Point(0, (int)(frame.size().width * 0.2)), cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(255, 255, 255), 1, 8);
     }
 
     void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft)
