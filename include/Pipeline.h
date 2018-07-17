@@ -184,7 +184,7 @@ public:
             {
                 // Update Counter
                 CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
-                DrawCounter()
+                DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
             }
 
             DrawData(frame, frameCount, fontScale);
