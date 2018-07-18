@@ -218,7 +218,11 @@ public:
             }
             ++frameCount;
         }
+        if (cap.isOpened()) {
+            cap.release();
+        }
 
+        // Calculate Time for components
         double tEnd  = cv::getTickCount();
         double totalRunTime = (tEnd - tStart)/cv::getTickFrequency();
         double tFrameModificationRuntTime = tFrameModification/cv::getTickFrequency();
@@ -226,35 +230,49 @@ public:
         double trackingRunTime = tTracking/cv::getTickFrequency();
         double countingRunTime = tCounting/cv::getTickFrequency();
         double FDTCRuntime = tFrameModificationRuntTime + detectionRunTime + trackingRunTime + countingRunTime;
-        LOG(INFO)  << "Frame Modification time = " << tFrameModificationRuntTime << " seconds" <<std::endl;
-        LOG(INFO)  << "Detection time = " << detectionRunTime << " seconds" <<std::endl;
-        LOG(INFO)  << "Tracking time = " << trackingRunTime << " seconds" <<std::endl;
-        LOG(INFO)  << "Counting time = " << countingRunTime << " seconds" <<std::endl;
-        LOG(INFO)  << "FDTC time = " << FDTCRuntime << " seconds | Frame rate: "<< frameCount/FDTCRuntime << " fps" <<std::endl;
-        LOG(INFO)  << "Total time = " << totalRunTime << " seconds | Frame rate: "<< frameCount/totalRunTime << " fps" <<std::endl;
+
+        // Display and write output
+        std::ofstream csvFile;
+        csvFile.open ("../data/A1.csv");
+        csvFile << "Frame Modification time" << ",";
+        csvFile << "Detection time" << ",";
+        csvFile << "Tracking time" << ",";
+        csvFile << "Counting time" << ",";
+        csvFile << "FDTC time" << ",";
+        csvFile << "Total time" << ",";
+        csvFile << "FDTC frame rate" << ",";
+        csvFile << "Total frame rate" << "\n";
+        LOG(INFO)  << "Frame Modification time = " << tFrameModificationRuntTime << " seconds" << std::endl;
+        csvFile << tFrameModificationRuntTime << ",";
+        LOG(INFO)  << "Detection time = " << detectionRunTime << " seconds" << std::endl;
+        csvFile << detectionRunTime << ",";
+        LOG(INFO)  << "Tracking time = " << trackingRunTime << " seconds" << std::endl;
+        csvFile << trackingRunTime<< ",";
+        LOG(INFO)  << "Counting time = " << countingRunTime << " seconds" << std::endl;
+        csvFile << countingRunTime << ",";
+        LOG(INFO)  << "FDTC time = " << FDTCRuntime << " seconds " << std::endl;
+        csvFile << FDTCRuntime << ",";
+        LOG(INFO)  << "Total time = " << totalRunTime << " seconds " << std::endl;
+        csvFile << totalRunTime << ",";
+        LOG(INFO)  << " FDTC frame rate: "<< frameCount/FDTCRuntime << " fps" <<std::endl;
+        csvFile << frameCount/FDTCRuntime  << ",";
+        LOG(INFO)  << " Total frame rate: "<< frameCount/totalRunTime << " fps" << std::endl;
+        csvFile << frameCount/totalRunTime << "\n";
         LOG(INFO)  << "Left to Right or Top to Bottom ";
+        csvFile << "Object label" << "," << "count Left to Right" << "\n";
         for(auto elem : countObjects_LefttoRight)
         {
             LOG(INFO) << elem.first << " " << elem.second << "\n";
+            csvFile << elem.first << "," << elem.second << "\n";
         }
         LOG(INFO)  << "Right to Left or Bottom to Top";
+        csvFile << "Object label" << "," << "count Right to Left" << "\n";
         for(auto elem : countObjects_RighttoLeft)
         {
             LOG(INFO) << elem.first << " " << elem.second << "\n";
+            csvFile << elem.first << "," << elem.second << "\n";
         }
-        if (cap.isOpened()) {
-            cap.release();
-        }
-        std::ofstream csvFile;
-        csvFile.open ("../data/A1.csv");
-        csvFile << tFrameModificationRuntTime << ",";
-        csvFile << detectionRunTime << ",";
-        csvFile << trackingRunTime<< ",";
-        csvFile << countingRunTime << ",";
-        csvFile << FDTCRuntime << ",";
-        csvFile << totalRunTime << ",";
-        csvFile << frameCount/FDTCRuntime  << ",";
-        csvFile << frameCount/totalRunTime;
+
         csvFile.close();
     }
 protected:
