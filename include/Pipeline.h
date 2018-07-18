@@ -226,11 +226,12 @@ public:
         double trackingRunTime = tTracking/cv::getTickFrequency();
         double countingRunTime = tCounting/cv::getTickFrequency();
         double FDTCRuntime = tFrameModificationRuntTime + detectionRunTime + trackingRunTime + countingRunTime;
-        LOG(INFO)  << "Total time = " << totalRunTime << " seconds | Frame rate: "<< frameCount/totalRunTime << " fps" <<std::endl;
+        LOG(INFO)  << "Frame Modification time = " << tFrameModificationRuntTime << " seconds" <<std::endl;
         LOG(INFO)  << "Detection time = " << detectionRunTime << " seconds" <<std::endl;
         LOG(INFO)  << "Tracking time = " << trackingRunTime << " seconds" <<std::endl;
         LOG(INFO)  << "Counting time = " << countingRunTime << " seconds" <<std::endl;
-        LOG(INFO)  << "Frame Modification, Detection, Tracking, Counting time = " << FDTCRuntime << " seconds | Frame rate: "<< frameCount/FDTCRuntime << " fps" <<std::endl;
+        LOG(INFO)  << "FDTC time = " << FDTCRuntime << " seconds | Frame rate: "<< frameCount/FDTCRuntime << " fps" <<std::endl;
+        LOG(INFO)  << "Total time = " << totalRunTime << " seconds | Frame rate: "<< frameCount/totalRunTime << " fps" <<std::endl;
         LOG(INFO)  << "Left to Right or Top to Bottom ";
         for(auto elem : countObjects_LefttoRight)
         {
