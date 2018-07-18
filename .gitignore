@@ -7,3 +7,4 @@ build
 
 !models/README.md
 !data/VOC0712/*
+!data/VOC0712Plus/*
