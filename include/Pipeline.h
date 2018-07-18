@@ -245,6 +245,17 @@ public:
         if (cap.isOpened()) {
             cap.release();
         }
+        std::ofstream csvFile;
+        csvFile.open ("..data/A1.csv");
+        csvFile << tFrameModificationRuntTime << ",";
+        csvFile << detectionRunTime << ",";
+        csvFile << trackingRunTime<< ",";
+        csvFile << countingRunTime << ",";
+        csvFile << FDTCRuntime << ",";
+        csvFile << totalRunTime << ",";
+        csvFile << frameCount/FDTCRuntime  << ",";
+        csvFile << frameCount/totalRunTime;
+        csvFile.close();
     }
 protected:
     std::unique_ptr<CTracker> m_tracker;
