@@ -18,9 +18,20 @@ const char* keys =
                 "{ crop_y         |350                   | Frame modification parameter: y coordinate of location of interest | }"
                 "{ crop_width     |600                 | Frame modification parameter: width of location of interest | }"
                 "{ crop_height    |350                 | Frame modification parameter: height of location of interest | }"
+                // 07+12 SSD300
+                //                "{ m model        |../models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt | Detection parameter: Model file | }"
+                //                "{ w weight       |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+//                 07+12 SSD512
+//                                "{ m model        |../models/VGGNet/VOC0712/SSD_512x512/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712/SSD_512x512/VGG_VOC0712_SSD_512x512_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+                // 07++12 SSD300
+//                "{ m model        |../models/VGGNet/VOC0712Plus/SSD_300x300/deploy.prototxt | Detection parameter: Model file | }"
+//                "{ w weight       |../models/VGGNet/VOC0712Plus/SSD_300x300/VGG_VOC0712Plus_SSD_300x300_iter_240000.caffemodel  | Detection parameter: Weight file | }"
+                // 07++12 SSD500
+                                "{ m model        |../models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt | Detection parameter: Model file | }"
+                                "{ w weight       |../models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel  | Detection parameter: Weight file | }"
 
-                "{ m model        |../models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt | Detection parameter: Model file | }"
-                "{ w weight       |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+
                 "{ lm label_map   |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Detection parameter: Label map  file  | }"
                 "{ th threshold   |0.5                 | Detection parameter: Confidence percentage of detected objects must exceed this value to be reported as a detected object. | }"
                 "{ dd desired_detect |1                | Detection Parameter: Flag to detect only desired objects | }"

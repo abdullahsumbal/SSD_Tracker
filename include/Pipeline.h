@@ -279,8 +279,8 @@ protected:
     double CalculateRelativeSize(int frame_width, int frame_height)
     {
         int baseLine = 0;
-        double countBoxWidth = frame_width * 0.2;
-        double countBoxHeight = frame_height * 0.2;
+        double countBoxWidth = frame_width * 0.1;
+        double countBoxHeight = frame_height * 0.1;
         cv::Rect countBoxRec(0, 200, int(countBoxWidth), int(countBoxHeight));
         std::string counterLabel_Left = "Count : " + std::to_string(0);
         cv::Size rect = cv::getTextSize(counterLabel_Left, cv::FONT_HERSHEY_PLAIN, 1.0, 1, &baseLine);
