@@ -208,10 +208,12 @@ public:
         double tEnd  = cv::getTickCount();
         double runTime = (tEnd - tStart)/cv::getTickFrequency();
         LOG(INFO)  << "Total time = " << runTime << " seconds | Frame rate: "<< frameCount/runTime << " fps" <<std::endl;
+        LOG(INFO)  << "Left to Right or Top to Bottom ";
         for(auto elem : countObjects_LefttoRight)
         {
             std::cout << elem.first << " " << elem.second << "\n";
         }
+        LOG(INFO)  << "Right to Left or Bottom to Top";
         for(auto elem : countObjects_RighttoLeft)
         {
             std::cout << elem.first << " " << elem.second << "\n";
@@ -463,7 +465,7 @@ protected:
                     {
                         track->m_trace.SecondPass();
                         std::pair<std::map<string, int>::iterator,bool> ret;
-                        ret = countObjects_LefttoRight.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
+                        ret = countObjects_RighttoLeft.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
                         if (!ret.second) {
                             ret.first->second = ret.first->second + 1;
                         }
@@ -472,7 +474,7 @@ protected:
                     {
                         track->m_trace.SecondPass();
                         std::pair<std::map<string, int>::iterator,bool> ret;
-                        ret = countObjects_RighttoLeft.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
+                        ret =  countObjects_LefttoRight.insert ( std::pair<string, int>(track->m_lastRegion.m_type, 1));
                         if (!ret.second) {
                             ret.first->second = ret.first->second + 1;
                         }
