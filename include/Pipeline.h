@@ -114,10 +114,17 @@ public:
         std::map <string,  int> countObjects_RighttoLeft;
         double fontScale = CalculateRelativeSize(frame_width, frame_height);
 
+        double tFrameModification = 0;
+        double tDetection = 0;
+        double tTracking = 0;
+        double tCounting = 0;
+        double tDTC = 0;
         double tStart  = cv::getTickCount();
 
         // Process one frame at a time
         while (true) {
+
+            double tStartFrameModification = cv::getTickCount();
             bool success = cap.read(frame);
             if (!success) {
                 LOG(INFO) << "Process " << frameCount << " frames from " << inFile;
@@ -144,8 +151,10 @@ public:
                 // Shallow copy
                 frame = copyFrame;
             }
+            tFrameModification += cv::getTickCount() - tStartFrameModification;
 
             // Get all the detected objects.
+            double tStartDetection = cv::getTickCount();
             regions_t tmpRegions;
             std::vector<vector<float> > detections = detectframe(frame);
 
@@ -177,16 +186,21 @@ public:
                 }
                 //cv::imshow("Video", frame);
             }
+            tDetection += cv::getTickCount() - tStartDetection;
 
+            double tStartTracking = cv::getTickCount();
             // Update Tracker
             cv::UMat clFrame;
             clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
+            tTracking += cv::getTickCount() - tStartTracking;
 
             if(enableCount)
             {
+                double tStartCounting = cv::getTickCount();
                 // Update Counter
                 CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
+                tCounting += cv::getTickCount() - tStartCounting;
 
                 if(drawCount){
                     DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
@@ -204,23 +218,62 @@ public:
             }
             ++frameCount;
         }
-
-        double tEnd  = cv::getTickCount();
-        double runTime = (tEnd - tStart)/cv::getTickFrequency();
-        LOG(INFO)  << "Total time = " << runTime << " seconds | Frame rate: "<< frameCount/runTime << " fps" <<std::endl;
-        LOG(INFO)  << "Left to Right or Top to Bottom ";
-        for(auto elem : countObjects_LefttoRight)
-        {
-            std::cout << elem.first << " " << elem.second << "\n";
-        }
-        LOG(INFO)  << "Right to Left or Bottom to Top";
-        for(auto elem : countObjects_RighttoLeft)
-        {
-            std::cout << elem.first << " " << elem.second << "\n";
-        }
         if (cap.isOpened()) {
             cap.release();
         }
+
+        // Calculate Time for components
+        double tEnd  = cv::getTickCount();
+        double totalRunTime = (tEnd - tStart)/cv::getTickFrequency();
+        double tFrameModificationRuntTime = tFrameModification/cv::getTickFrequency();
+        double detectionRunTime = tDetection/cv::getTickFrequency();
+        double trackingRunTime = tTracking/cv::getTickFrequency();
+        double countingRunTime = tCounting/cv::getTickFrequency();
+        double FDTCRuntime = tFrameModificationRuntTime + detectionRunTime + trackingRunTime + countingRunTime;
+
+        // Display and write output
+        std::ofstream csvFile;
+        csvFile.open ("../data/A1.csv");
+        csvFile << "Frame Modification time" << ",";
+        csvFile << "Detection time" << ",";
+        csvFile << "Tracking time" << ",";
+        csvFile << "Counting time" << ",";
+        csvFile << "FDTC time" << ",";
+        csvFile << "Total time" << ",";
+        csvFile << "FDTC frame rate" << ",";
+        csvFile << "Total frame rate" << "\n";
+        LOG(INFO)  << "Frame Modification time = " << tFrameModificationRuntTime << " seconds" << std::endl;
+        csvFile << tFrameModificationRuntTime << ",";
+        LOG(INFO)  << "Detection time = " << detectionRunTime << " seconds" << std::endl;
+        csvFile << detectionRunTime << ",";
+        LOG(INFO)  << "Tracking time = " << trackingRunTime << " seconds" << std::endl;
+        csvFile << trackingRunTime<< ",";
+        LOG(INFO)  << "Counting time = " << countingRunTime << " seconds" << std::endl;
+        csvFile << countingRunTime << ",";
+        LOG(INFO)  << "FDTC time = " << FDTCRuntime << " seconds " << std::endl;
+        csvFile << FDTCRuntime << ",";
+        LOG(INFO)  << "Total time = " << totalRunTime << " seconds " << std::endl;
+        csvFile << totalRunTime << ",";
+        LOG(INFO)  << " FDTC frame rate: "<< frameCount/FDTCRuntime << " fps" <<std::endl;
+        csvFile << frameCount/FDTCRuntime  << ",";
+        LOG(INFO)  << " Total frame rate: "<< frameCount/totalRunTime << " fps" << std::endl;
+        csvFile << frameCount/totalRunTime << "\n";
+        LOG(INFO)  << "Left to Right or Top to Bottom ";
+        csvFile << "Object label" << "," << "count Left to Right" << "\n";
+        for(auto elem : countObjects_LefttoRight)
+        {
+            LOG(INFO) << elem.first << " " << elem.second << "\n";
+            csvFile << elem.first << "," << elem.second << "\n";
+        }
+        LOG(INFO)  << "Right to Left or Bottom to Top";
+        csvFile << "Object label" << "," << "count Right to Left" << "\n";
+        for(auto elem : countObjects_RighttoLeft)
+        {
+            LOG(INFO) << elem.first << " " << elem.second << "\n";
+            csvFile << elem.first << "," << elem.second << "\n";
+        }
+
+        csvFile.close();
     }
 protected:
     std::unique_ptr<CTracker> m_tracker;
@@ -279,8 +332,8 @@ protected:
     double CalculateRelativeSize(int frame_width, int frame_height)
     {
         int baseLine = 0;
-        double countBoxWidth = frame_width * 0.2;
-        double countBoxHeight = frame_height * 0.2;
+        double countBoxWidth = frame_width * 0.1;
+        double countBoxHeight = frame_height * 0.1;
         cv::Rect countBoxRec(0, 200, int(countBoxWidth), int(countBoxHeight));
         std::string counterLabel_Left = "Count : " + std::to_string(0);
         cv::Size rect = cv::getTextSize(counterLabel_Left, cv::FONT_HERSHEY_PLAIN, 1.0, 1, &baseLine);

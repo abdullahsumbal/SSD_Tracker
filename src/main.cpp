@@ -18,16 +18,38 @@ const char* keys =
                 "{ crop_y         |350                   | Frame modification parameter: y coordinate of location of interest | }"
                 "{ crop_width     |600                 | Frame modification parameter: width of location of interest | }"
                 "{ crop_height    |350                 | Frame modification parameter: height of location of interest | }"
-
+                // 07+12 SSD300
                 "{ m model        |../models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt | Detection parameter: Model file | }"
                 "{ w weight       |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+//                 07+12 SSD512
+//                                "{ m model        |../models/VGGNet/VOC0712/SSD_512x512/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712/SSD_512x512/VGG_VOC0712_SSD_512x512_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+                // 07++12 SSD300
+//                                "{ m model        |../models/VGGNet/VOC0712Plus/SSD_300x300/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712Plus/SSD_300x300/VGG_VOC0712Plus_SSD_300x300_iter_240000.caffemodel  | Detection parameter: Weight file | }"
+                // 07++12 SSD512
+//                                "{ m model        |../models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel  | Detection parameter: Weight file | }"
+                // 07+12+COCO SSD300
+//                                "{ m model        |../models/VGGNet/VOC0712/SSD_300x300_ft/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712/SSD_300x300_ft/VGG_VOC0712_SSD_300x300_ft_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+                // 07+12+COCO SSD512
+//                                "{ m model        |../models/VGGNet/VOC0712/SSD_512x512_ft/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712/SSD_512x512_ft/VGG_VOC0712_SSD_512x512_ft_iter_120000.caffemodel  | Detection parameter: Weight file | }"
+                // 07++12+COCO SSD300
+//                                "{ m model        |../models/VGGNet/VOC0712Plus/SSD_300x300_ft/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712Plus/SSD_300x300_ft/VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel  | Detection parameter: Weight file | }"
+                // 07++12+COCO SSD512
+//                                "{ m model        |../models/VGGNet/VOC0712Plus/SSD_512x512_ft/deploy.prototxt | Detection parameter: Model file | }"
+//                                "{ w weight       |../models/VGGNet/VOC0712Plus/SSD_512x512_ft/VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel  | Detection parameter: Weight file | }"
+
                 "{ lm label_map   |../models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel  | Detection parameter: Label map  file  | }"
                 "{ th threshold   |0.5                 | Detection parameter: Confidence percentage of detected objects must exceed this value to be reported as a detected object. | }"
                 "{ dd desired_detect |1                | Detection Parameter: Flag to detect only desired objects | }"
                 "{ dd desired_objects |15,2,12   | Detection Parameter: list of desired objects to detect | }"
 
                 "{ co count       |1                   | Counting parameter: Flag to use counting  | }"
-                "{ d direction    |1                   | Counting parameter: Variable to allow counting in a certain direction. 0 - left to right, 1 - right to left, 2 - both | }"
+                "{ d direction    |2                   | Counting parameter: Variable to allow counting in a certain direction. 0 - left to right, 1 - right to left, 2 - both | }"
                 "{ l1p1_x         |350                   | Counting parameter: line 1 point 1 x coordinate  | }"
                 "{ l1p1_y         |0                   | Counting parameter: line 1 point 1 y coordinate  | }"
                 "{ l1p2_x         |350                   | Counting parameter: line 1 point 2 x coordinate  | }"
@@ -40,7 +62,7 @@ const char* keys =
                 "{ dc draw_count  |1                   | Counting parameter: Flag to enable drawing info for count  | }"
                 "{ do draw_other  |1                   | Counting parameter: Flag to enable drawing info other component  | }"
 
-                "{ o output       |../data/o1.avi      | Writing parameter: Name of output video file | }"
+                "{ o output       |../data/A1.avi      | Writing parameter: Name of output video file | }"
                 "{ save_video     |1                   | Writing parameter: Flag to enable writing to file | }"
         };
 
