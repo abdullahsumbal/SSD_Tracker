@@ -246,7 +246,7 @@ public:
             cap.release();
         }
         std::ofstream csvFile;
-        csvFile.open ("..data/A1.csv");
+        csvFile.open ("../data/A1.csv");
         csvFile << tFrameModificationRuntTime << ",";
         csvFile << detectionRunTime << ",";
         csvFile << trackingRunTime<< ",";
