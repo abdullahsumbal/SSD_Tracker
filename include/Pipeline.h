@@ -114,10 +114,17 @@ public:
         std::map <string,  int> countObjects_RighttoLeft;
         double fontScale = CalculateRelativeSize(frame_width, frame_height);
 
+        double tFrameModification = 0;
+        double tDetection = 0;
+        double tTracking = 0;
+        double tCounting = 0;
+        double tDTC = 0;
         double tStart  = cv::getTickCount();
 
         // Process one frame at a time
         while (true) {
+
+            double tStartFrameModification = cv::getTickCount();
             bool success = cap.read(frame);
             if (!success) {
                 LOG(INFO) << "Process " << frameCount << " frames from " << inFile;
@@ -144,8 +151,10 @@ public:
                 // Shallow copy
                 frame = copyFrame;
             }
+            tFrameModification += cv::getTickCount() - tStartFrameModification;
 
             // Get all the detected objects.
+            double tStartDetection = cv::getTickCount();
             regions_t tmpRegions;
             std::vector<vector<float> > detections = detectframe(frame);
 
@@ -177,16 +186,21 @@ public:
                 }
                 //cv::imshow("Video", frame);
             }
+            tDetection += cv::getTickCount() - tStartDetection;
 
+            double tStartTracking = cv::getTickCount();
             // Update Tracker
             cv::UMat clFrame;
             clFrame = frame.getUMat(cv::ACCESS_READ);
             m_tracker->Update(tmpRegions, clFrame, m_fps);
+            tTracking += cv::getTickCount() - tStartTracking;
 
             if(enableCount)
             {
+                double tStartCounting = cv::getTickCount();
                 // Update Counter
                 CounterUpdater(frame, countObjects_LefttoRight, countObjects_RighttoLeft);
+                tCounting += cv::getTickCount() - tStartCounting;
 
                 if(drawCount){
                     DrawCounter(frame, fontScale, countObjects_LefttoRight, countObjects_RighttoLeft);
@@ -206,17 +220,26 @@ public:
         }
 
         double tEnd  = cv::getTickCount();
-        double runTime = (tEnd - tStart)/cv::getTickFrequency();
-        LOG(INFO)  << "Total time = " << runTime << " seconds | Frame rate: "<< frameCount/runTime << " fps" <<std::endl;
+        double totalRunTime = (tEnd - tStart)/cv::getTickFrequency();
+        double tFrameModificationRuntTime = tFrameModification/cv::getTickFrequency();
+        double detectionRunTime = tDetection/cv::getTickFrequency();
+        double trackingRunTime = tTracking/cv::getTickFrequency();
+        double countingRunTime = tCounting/cv::getTickFrequency();
+        double FDTCRuntime = tFrameModificationRuntTime + detectionRunTime + trackingRunTime + countingRunTime;
+        LOG(INFO)  << "Total time = " << totalRunTime << " seconds | Frame rate: "<< frameCount/totalRunTime << " fps" <<std::endl;
+        LOG(INFO)  << "Detection time = " << detectionRunTime << " seconds" <<std::endl;
+        LOG(INFO)  << "Tracking time = " << trackingRunTime << " seconds" <<std::endl;
+        LOG(INFO)  << "Counting time = " << countingRunTime << " seconds" <<std::endl;
+        LOG(INFO)  << "Frame Modification, Detection, Tracking, Counting time = " << FDTCRuntime << " seconds | Frame rate: "<< frameCount/FDTCRuntime << " fps" <<std::endl;
         LOG(INFO)  << "Left to Right or Top to Bottom ";
         for(auto elem : countObjects_LefttoRight)
         {
-            std::cout << elem.first << " " << elem.second << "\n";
+            LOG(INFO) << elem.first << " " << elem.second << "\n";
         }
         LOG(INFO)  << "Right to Left or Bottom to Top";
         for(auto elem : countObjects_RighttoLeft)
         {
-            std::cout << elem.first << " " << elem.second << "\n";
+            LOG(INFO) << elem.first << " " << elem.second << "\n";
         }
         if (cap.isOpened()) {
             cap.release();
