@@ -154,6 +154,28 @@ public:
 
         return res;
     }
+
+    void FirstPass()
+    {
+        m_firstPass = true;
+    }
+
+    void SecondPass()
+    {
+        m_secondPass = true;
+    }
+
+    bool GetFirstPass()
+    {
+        return m_firstPass;
+    }
+
+    bool GetSecondPass()
+    {
+        return m_secondPass;
+    }
+
+
     bool m_firstPass = false;
     bool m_secondPass = false;
     bool m_directionFromLeft = false;

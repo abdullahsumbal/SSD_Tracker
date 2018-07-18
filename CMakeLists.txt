@@ -11,7 +11,6 @@ set (PROJECT_NAME  SSD)
 # ----------------------------------------------------------------------------
 FIND_PACKAGE(Caffe REQUIRED)
 FIND_PACKAGE(OpenCV REQUIRED)
-
 # ----------------------------------------------------------------------------
 # Add Libraries and peoject files
 # ----------------------------------------------------------------------------
@@ -193,5 +192,5 @@ SOURCE_GROUP("GTL" FILES ${gtl_source} ${gtl_header})
 # ----------------------------------------------------------------------------
 # Link libraries to project
 # ----------------------------------------------------------------------------
-target_link_libraries(${PROJECT_NAME} ${Caffe_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Caffe_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS} )
