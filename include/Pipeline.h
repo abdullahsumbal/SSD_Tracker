@@ -233,7 +233,7 @@ public:
 
         // Display and write output
         std::ofstream csvFile;
-        csvFile.open ("../data/A1.csv");
+        csvFile.open ("../data/D2.csv");
         csvFile << "Frame Modification time" << ",";
         csvFile << "Detection time" << ",";
         csvFile << "Tracking time" << ",";
