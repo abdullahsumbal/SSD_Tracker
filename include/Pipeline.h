@@ -424,7 +424,15 @@ protected:
                     )
             {
                 DrawTrack(frame, 1, *track);
-                std::string label = track->m_lastRegion.m_type + ": " + std::to_string(track->m_lastRegion.m_confidence);
+                std::string objectName;
+                if (track->m_lastRegion.m_type == "2.0"){
+                    objectName = "Bicycle";
+                }
+                if (track->m_lastRegion.m_type == "15.0"){
+                    objectName = "People";
+                }
+
+                std::string label = objectName + ": " + std::to_string((track->m_lastRegion.m_confidence * 10000)/100) + " %";
                 //std::string label = std::to_string(track->m_trace.m_firstPass) + " | " + std::to_string(track->m_trace.m_secondPass);
                 int baseLine = 0;
                 cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
