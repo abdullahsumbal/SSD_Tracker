@@ -310,8 +310,6 @@ protected:
             return cv::Point(resizeCoeff * pt.x, resizeCoeff * pt.y);
         };
 
-        // 75,172,198 light
-                // 39,102,119
 
         if (track.m_lastRegion.m_type == "People")
         {
@@ -470,7 +468,7 @@ protected:
 
        // cv::line( frame, cv::Point( line2_x1, line2_y1 ), cv::Point( line2_x2, line2_y2), cv::Scalar( 120, 220, 0),  3, 8 );
 
-        // Counter label
+        // Create Counter label
         std::string counterLabel_L = "Count --> : ";
         std::string counterLabel_R = "Count <-- : ";
         for(auto elem : countObjects_LefttoRight){
@@ -479,6 +477,8 @@ protected:
         for(auto elem : countObjects_RighttoLeft){
             counterLabel_R += elem.first + ": " + std::to_string(elem.second) + " | ";
         }
+
+        // Draw counter label
         int baseLine = 0;
         float fontSize = 0.4;
         cv::Size labelSize_LR = cv::getTextSize(counterLabel_L, cv::FONT_HERSHEY_SIMPLEX, fontSize, 1, &baseLine);
@@ -495,9 +495,11 @@ protected:
 //        cv::putText(frame, counterLabel_R, cv::Point(10, 600 + 30), cv::FONT_HERSHEY_SIMPLEX, fontSize, cv::Scalar(0, 0, 0),1.5);
     }
 
+
     void CounterUpdater(cv::Mat frame, std::map <string,  int> &countObjects_LefttoRight, std::map <string,  int> &countObjects_RighttoLeft)
     {
 
+        // Draw Counter line
         cv::Point polyLinePoints[1][4];
         polyLinePoints [0][0] = cv::Point (line2_x2,line2_y2);
         polyLinePoints [0][1] = cv::Point (line2_x1,line2_y1);
@@ -512,6 +514,7 @@ protected:
         {
             if(track->m_trace.size() >= 2)
             {
+                // Extract the last two points from trace.
                 track_t pt1_x = track->m_trace.at(track->m_trace.size() - 2).m_prediction.x;
                 track_t pt1_y = track->m_trace.at(track->m_trace.size() - 2).m_prediction.y;
                 track_t pt2_x = track->m_trace.at(track->m_trace.size() - 1).m_prediction.x;
@@ -524,6 +527,8 @@ protected:
                 if (310 <= pt2_y and pt2_y <= 330){
                     cv::fillPoly(frame, ppt, npt, 1, cv::Scalar( 0, 100, 0), 8);
                 }
+
+                // Update Counter from Left to Right
                 if(direction == 0)
                 {
                     if(pt1_position_line1 < 0  && pt2_position_line1 >= 0)
@@ -540,6 +545,7 @@ protected:
 
                         }
                     }
+                    // Update Counter from Right to Left
                 }else if (direction == 1)
                 {
                     if(pt2_position_line2 <= 0  && pt1_position_line2 > 0)
@@ -556,7 +562,8 @@ protected:
 
                         }
                     }
-                }else
+                }// Update Counter from both directions
+                else
                 {
                     if(pt2_position_line2 <= 0  && pt1_position_line2 > 0){
                         track->m_trace.FirstPass();
