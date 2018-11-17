@@ -3,13 +3,13 @@
 
 ## This project is under development.
 
-### Updated on 6 July 2018
+### Updated on 16 Nov 2018
 
 ### What Can it do right now?
 Detection, Tracking and Counting.
 
 ### I want to see a video of the output.
-Here is a [link](https://drive.google.com/file/d/16T_maoXj-p480xVYnEpNgJzN4NDqwHJw/view?usp=sharing).  
+Here is a [link](https://mcgill-my.sharepoint.com/:v:/g/personal/muhammad_sumbal_mail_mcgill_ca/ETmImhhJXoxChREpDGoEqmwBw4VgJQpzLCfrpDWNzHQyVQ?e=LDNgJt).  
 
 ### How fast is it?
 I am getting between 20 to 37 FPS on M60 GPU. Here is a [link](https://github.com/abdullahsumbal/Installtion/blob/master/SSD_Tracker_Tests/SSD_Tracking-Report.md) to some tests I conducted. 
