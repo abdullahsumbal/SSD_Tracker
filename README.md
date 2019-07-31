@@ -25,7 +25,7 @@ Install CUDA and CUDNN \
 Install caffe using cmake,\
 Install opencv3.3.1\
 and run my project.\
-Or shoot me a message if you very desperate :)
+Or shoot me a message :)
 
 ### How are you making all this work?
 1. I am using tracking implementation from [Multitarget-tracker](https://github.com/Smorodov/Multitarget-tracker)
@@ -33,12 +33,7 @@ Or shoot me a message if you very desperate :)
 3. I will be implementing my own version of counting.
 
 ### Can you provide installation and implementation documentation?
-As promised, the pipeline document is out. Here is the [link](https://drive.google.com/open?id=1-g0aO1VBpcY-WMtEbet16w_cQNtlfSt-).\
-I am currently working on the testing document. Coming up soon.
- 
-
-### Bro, your english and coding sucks?
-I know :( , I am working on it.
+Here is the [link](https://drive.google.com/open?id=1-g0aO1VBpcY-WMtEbet16w_cQNtlfSt-).\
 
 ### Bro, you are awesome!!!
 I know :)
