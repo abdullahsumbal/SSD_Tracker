@@ -33,7 +33,7 @@ Or shoot me a message :)
 3. I will be implementing my own version of counting.
 
 ### Can you provide installation and implementation documentation?
-Here is the [link](https://drive.google.com/open?id=1-g0aO1VBpcY-WMtEbet16w_cQNtlfSt-).\
+Here is the [link](https://drive.google.com/open?id=1-g0aO1VBpcY-WMtEbet16w_cQNtlfSt-).
 
 ### Bro, you are awesome!!!
 I know :)
